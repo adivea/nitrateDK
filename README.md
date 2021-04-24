@@ -38,11 +38,6 @@ This repository has the following directory structure:
 ```README.md``` | This very readme with instructions
 ```LICENSE``` | [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0) which specifies the permitted usage of the repository
 
-Furthermore it contains the files:
-- ```./create_lang_venv.sh``` -> A bash script which automatically generates a new virtual environment, and install all the packages contained within ```requirements.txt```
-- ```requirements.txt``` -> A list of packages along with the versions that are certain to work
-- ```README.md``` -> This very readme file
-
 ## Contact
 
 Feel free to write the authors, Emil Jessen or Johan Horsmans for any questions regarding the scripts.
