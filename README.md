@@ -6,25 +6,31 @@ This repository contains the exam project on the relationship between groundwate
 
 For running the scripts we recommend doing the following from your terminal both as a setup as well as doing the analysis of the data.
 
-1. Clone the repo
+1. 
+Clone the repo
 ```bash
 git clone https://github.com/emiltj/spatial_exam.git
 ```
-2. Download layers to layer folder
-[Organic areas 2012-2020](https://filkassen.statens-it.dk/userportal/#/shared/public/1LYhhae2IbnGtiGO/%C3%98kologiske%20arealer)
-[Wetland areas with nitrate problems 2021](https://filkassen.statens-it.dk/userportal/#/shared/public/3oUctK2FHIbMhRy_/Miniv%C3%A5domr%C3%A5dekort%202021)
-[Wetland areas with nitrate problems 2020](https://filkassen.statens-it.dk/userportal/#/shared/public/ovpGodH6RpCw-kaq/Miniv%C3%A5domr%C3%A5der%202020)
+2. 
+Download layers to layer folder
+- [Organic areas 2012-2020](https://filkassen.statens-it.dk/userportal/#/shared/public/1LYhhae2IbnGtiGO/%C3%98kologiske%20arealer)
+- [Wetland areas with nitrate problems 2021](https://filkassen.statens-it.dk/userportal/#/shared/public/3oUctK2FHIbMhRy_/Miniv%C3%A5domr%C3%A5dekort%202021)
+- [Wetland areas with nitrate problems 2020](https://filkassen.statens-it.dk/userportal/#/shared/public/ovpGodH6RpCw-kaq/Miniv%C3%A5domr%C3%A5der%202020)
 
-3. Unzip organic layers
+3. 
+Unzip organic layers
 ```bash
 unzip spatial_exam/layers/Økologiske arealer.zip
 ```
 
-4. Run the ```spatial_analysis.rmd```
+4. 
+Run the ```spatial_analysis.rmd```
 
-5. ???
+5. 
+???
 
-6. Profit
+6. 
+Profit
 
 
 ## Repo structure and files
