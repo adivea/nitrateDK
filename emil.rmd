@@ -1,0 +1,26 @@
+---
+title: "emil"
+output: html_document
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r}
+library(pacman)
+p_load(sf, raster, dplyr, tmap, ggplot2, tidyverse)
+```
+
+```{r}
+shapefilenames = Sys.glob("data/*.shp")
+shapefilenames[1]
+```
+
+
+```{r}
+files = lapply(shapefilenames, function(x)
+  st_read({x}))
+```
+
+```{r}
+```
+

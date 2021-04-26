@@ -67,4 +67,3 @@ marker <- st_read("farm_layers/Markblok.shp") %>% na.omit() #loading raster cont
 ```{r}
 tm_shape(marker) + tm_polygons() #Plotting farms
 ```
-
