@@ -1,0 +1,72 @@
+```{r}
+library(pacman)
+
+p_load(sf, raster, dplyr, tmap, ggplot2, tidyverse)
+```
+
+```{r}
+nitrate <- as.data.frame(read_csv("nitrate100000.csv")) #Load the .csv-file as a dataframe and save it as "cities".
+
+nitrateagg <- as.data.frame(read_csv("nitrate100000agg.csv")) #Load the .csv-file as a dataframe and save it as "cities".
+
+
+nitrate <- raster("http://data.geus.dk/geusmap/ows/25832.jsp?mapname=nitrat_2mg_and_above_aggr&whoami=horsmans1004@gmail.com") #Load the .csv-file as a dataframe and save it as "cities".
+
+
+nitrate_shape <- st_read("nitrat_2mg_and_above.shp")
+```
+```{r}
+#Remove shit from point column
+
+test <- nitrate
+test$WKT <- as.character(test$WKT)
+
+
+test$WKT <- gsub("POINT \\(", "", test$WKT)
+test$WKT <- gsub(")", "", test$WKT)
+```
+
+Separate into two columns
+```{r}
+test2 <- test %>% 
+  separate(col = WKT, into = c("longitude","latitude"), sep = " ")
+
+```
+
+```{r}
+test3 <- st_as_sf(test2, coords = c("longitude", "latitude"))
+
+```
+
+```{r}
+plot(st_geometry(test3))
+```
+
+#Agg
+
+```{r}
+test <- structure(list(Shape = c(1.1, 1.1, 1.1, 1.1), 
+                       long = c(43L, 43L, 40L, 40L), 
+                       lat = c(10L, 13L, 13L, 10L)), 
+                  class = "data.frame", 
+                  row.names = c("1", "2", "3", "4"))
+##
+
+test <- as.matrix(rbind(test[,-1], test[1, -1]))
+
+Coord_Ref <- st_crs(3035)
+plot_locations_test <- st_polygon(x = list(test))
+plot_locations_test <- st_sfc(plot_locations_test, crs = Coord_Ref)
+ggplot(plot_locations_test) + geom_sf(fill = "red", alpha = 0.1)
+```
+
+
+```{r}
+marker <- st_read("Markblok.shp") %>% na.omit() #loading raster containing burial mounds. 
+
+```
+```{r}
+tm_shape(marker) + tm_polygons() #Plotting mounds.
+
+```
+
