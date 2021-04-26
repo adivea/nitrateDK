@@ -5,9 +5,9 @@ p_load(sf, raster, dplyr, tmap, ggplot2, tidyverse)
 ```
 
 ```{r}
-nitrate <- as.data.frame(read_csv("nitrate100000.csv")) #Load the .csv-file as a dataframe and save it as "cities".
+nitrate <- as.data.frame(read_csv("nitrate/nitrate.csv")) #Load the .csv-file as a dataframe and save it as "cities".
 
-nitrateagg <- as.data.frame(read_csv("nitrate100000agg.csv")) #Load the .csv-file as a dataframe and save it as "cities".
+nitrateagg <- as.data.frame(read_csv("nitrate/nitrate aggregated.csv")) #Load the .csv-file as a dataframe and save it as "cities".
 
 
 nitrate <- raster("http://data.geus.dk/geusmap/ows/25832.jsp?mapname=nitrat_2mg_and_above_aggr&whoami=horsmans1004@gmail.com") #Load the .csv-file as a dataframe and save it as "cities".
@@ -62,7 +62,7 @@ ggplot(plot_locations_test) + geom_sf(fill = "red", alpha = 0.1)
 
 
 ```{r}
-marker <- st_read("Markblok.shp") %>% na.omit() #loading raster containing burial mounds. 
+marker <- st_read("farm_layers/Markblok.shp") %>% na.omit() #loading raster containing burial mounds. 
 
 ```
 ```{r}
