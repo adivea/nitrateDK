@@ -11,16 +11,21 @@ p_load(sf, raster, dplyr, tmap, ggplot2, tidyverse)
 ```
 
 ```{r}
-shapefilenames = Sys.glob("data/*.shp")
-shapefilenames[1]
+oko18 = st_read("data/Oekologiske_arealer_2018.shp")
+oko18
+
+region = st_read("data/REGION.shp")
+region
+
+
 ```
 
-
 ```{r}
-files = lapply(shapefilenames, function(x)
-  st_read({x}))
+tm_shape(region) + tm_polygons()
+tm_shape(oko18) + tm_polygons()
 ```
 
 ```{r}
+
 ```
 
