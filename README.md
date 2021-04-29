@@ -14,11 +14,11 @@
     <a href="https://github.com/emiltj/groundwater_pollution_dk"><strong>Explore the docs »</strong></a>
     <br />
     <br />
-    <a href="https://github.com/emiltj/groundwater_pollution_dk">View Demo</a>
+    <a href="https://github.com/emiltj/groundwater_pollution_dk">View demo</a>
     ·
-    <a href="https://github.com/emiltj/groundwater_pollution_dk/issues">Report Bug</a>
+    <a href="https://github.com/emiltj/groundwater_pollution_dk/issues">Report bug</a>
     ·
-    <a href="https://github.com/emiltj/groundwater_pollution_dk/issues">Request Feature</a>
+    <a href="https://github.com/emiltj/groundwater_pollution_dk/issues">Request feature</a>
   </p>
 </p>
 
@@ -28,18 +28,18 @@
   <summary>Table of Contents</summary>
   <ol>
     <li>
-      <a href="#about-the-project">About The Project</a>
+      <a href="#about-the-project">About the project</a>
       <ul>
-        <li><a href="#built-with">Built With</a></li>
+        <li><a href="#built-with">Built with</a></li>
       </ul>
     </li>
     <li>
-      <a href="#getting-started">Getting Started</a>
+      <a href="#getting-started">Getting started</a>
       <ul>
         <li><a href="#prerequisites">Prerequisites</a></li>
       </ul>
     </li>
-    <li><a href="#repository-structure">Repository Structure</a></li>
+    <li><a href="#repository-structure">Repository structure</a></li>
       <ul>
         <li><a href="#Data">Data</a></li>
       </ul>
@@ -53,7 +53,7 @@
 
 
 <!-- ABOUT THE PROJECT -->
-## About The Project
+## About the project
 
 <img src="README_images/analysis_example.png" alt="Logo" width="375" height="295">
 
@@ -71,7 +71,7 @@ Findings of the analysis:
 
 Of course,
 
-### Built With
+### Built with
 
 This project has been built using already existing publically available software and data. 
 * [RStudio](https://www.rstudio.com/) - Software used for conducting the analysis
@@ -80,7 +80,7 @@ This project has been built using already existing publically available software
 
 
 <!-- GETTING STARTED -->
-## Getting Started
+## Getting started
 
 To get a local copy up and running follow these simple example steps.
 
