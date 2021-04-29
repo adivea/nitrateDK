@@ -176,13 +176,13 @@ tm_shape(nitrate_grid[1])  +
   tm_layout(main.title = "Nitrate pollution map")
 ###
 
-image(nitrate_grid, col = matlab.like(100))
-contour(nitrate_grid, levels= seq(1, 10, 1), add = TRUE, col = "black")
-print(nitrate_grid)
+#image(nitrate_grid, col = matlab.like(100))
+#contour(nitrate_grid, levels= seq(1, 10, 1), add = TRUE, col = "black")
+#print(nitrate_grid)
 # Calculate the probability of organic matter exceeding 7
-nitrate_grid$pFertile <- 1 - pnorm(50, mean = nitrate_grid$var1.pred, sd = sqrt(nitrate_grid$var1.var))
+#nitrate_grid$pFertile <- 1 - pnorm(50, mean = nitrate_grid$var1.pred, sd = sqrt(nitrate_grid$var1.var))
 # Map the probability of soils OM exceeding 7
-spplot(nitrate_grid, zcol = "pFertile")
+#spplot(nitrate_grid, zcol = "pFertile")
 # Plot soil-nutrient content estimates with a color ramp
 ```
 
