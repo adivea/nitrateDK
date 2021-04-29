@@ -8,18 +8,26 @@ output: github_document
 ```{r}
 library(pacman)
 
-p_load(sf, raster, dplyr, tmap, ggplot2, tidyverse)
+p_load(sf, raster, dplyr, tmap, ggplot2, tidyverse, lubridate, sp, gstat)
 ```
 
 ```{r}
-nitrate <- as.data.frame(read_csv("nitrate/nitrate.csv")) #Load the .csv-file as a dataframe and save it as "nitrates".
+nitrate <- as.data.frame(read_csv("data/nitrate.csv")) #Load the .csv-file as a dataframe and save it as "nitrate".
 
-nitrateagg <- as.data.frame(read_csv("nitrate/nitrate aggregated.csv")) #Load the .csv-file as a dataframe and save it as "nitrateagg".
+#Rename columns to remove spaces:
+names(nitrate)[names(nitrate) == "Seneste"] <- "Seneste_måling" 
+names(nitrate)[names(nitrate) == "Seneste mg/l"] <- "Seneste_mgl"
 ```
+
+Remove outliers
+```{r}
+nitrate <- nitrate %>%
+  filter_at(vars("Seneste_mgl"), any_vars(. < 200))
+```
+
 
 Processing the nitrate.csv-file into a compatible format.
 ```{r}
-nitrate <- nitrate
 nitrate$WKT <- as.character(nitrate$WKT)
 nitrate$WKT <- gsub("POINT \\(", "", nitrate$WKT)
 nitrate$WKT <- gsub(")", "", nitrate$WKT)
@@ -29,7 +37,6 @@ Separate into two columns
 ```{r}
 nitrate <- nitrate %>% 
   separate(col = WKT, into = c("longitude","latitude"), sep = " ")
-
 ```
 
 Making it a shapefile
@@ -37,33 +44,146 @@ Making it a shapefile
 nitrate <- st_as_sf(nitrate, coords = c("longitude", "latitude"))
 ```
 
+Filtering dates between 2018 and 2021:
+```{r}
+nitrate <- nitrate %>%
+ select(Seneste_måling, Seneste_mgl, geometry) %>%
+ filter(Seneste_måling >= as.Date("2018-01-01") & Seneste_måling <= as.Date("2021-03-10"))
+```
+
+Remove duplicate entries (for the purpose of kriging)
+```{r}
+nitrate<-nitrate[!duplicated(nitrate$geometry), ]
+```
+
+
 Plotting the points
 ```{r}
 plot(st_geometry(nitrate))
 ```
 
-#Agg
+
+#Exploratory statistics:
 
 ```{r}
-#test <- structure(list(Shape = c(1.1, 1.1, 1.1, 1.1), 
-                    #   long = c(43L, 43L, 40L, 40L), 
-                     #  lat = c(10L, 13L, 13L, 10L)), 
-                  #class = "data.frame", 
-                  #row.names = c("1", "2", "3", "4"))
-##
+summary(nitrate$Seneste_mgl)
+```
+```{r}
+hist(nitrate$Seneste_mgl)
+```
 
-#test <- as.matrix(rbind(test[,-1], test[1, -1]))
+Plotting points with nitrate per. mg/l metric:
+```{r}
+ggplot(nitrate) +
+  geom_sf(aes(col = Seneste_mgl)) 
+```
 
-#Coord_Ref <- st_crs(3035)
-#plot_locations_test <- st_polygon(x = list(test))
-#plot_locations_test <- st_sfc(plot_locations_test, crs = Coord_Ref)
-#ggplot(plot_locations_test) + geom_sf(fill = "red", alpha = 0.1)
+# Kriging:
+
+Creating X- and Y-value columns
+```{r}
+nitrate$X <- st_coordinates(nitrate)[,1]
+nitrate$Y <- st_coordinates(nitrate)[,2]
 ```
 
 
+Make variogram by fitting X- and Y coordinates to nitrate mg/l with a linear regression
 ```{r}
-marker <- st_read("farm_layers/Markblok.shp") %>% na.omit() #loading raster containing farm polygons
+vgm <- variogram(nitrate$Seneste_mgl ~ X + Y, nitrate)
+plot(vgm)
 ```
+
+ADELAS TEXT: "You might imagine that if soil at a particular point is nutrient-rich, then soil one metre away is likely to be fertile too. But can you say the same thing about soil one kilometre away, or ten kilometres, or one hundred kilometres?"
+
+JOHANS TEXT: "It appears that it is very hard to find spatial correlations in the data. Nonetheles, it appears that the first 30000 (units) are more correlated than those further away. As such, we argue that this model can be used for kriging, since it only needs to interpolate data that is close to "real" data".
+
+Fit a model to the variogram:
+
 ```{r}
-tm_shape(marker) + tm_polygons() #Plotting farms
+# Eyeball the variogram and estimate the initial parameters (ADELA TEXT)
+nugget <- 550
+psill <- -360
+range <- 45000
+# Fit the variogram (ADELA TEXT)
+v_model <- fit.variogram(
+  vgm, 
+  model = vgm(
+    model = "Ste",
+    nugget = nugget,
+    psill = psill,
+    range = range,
+    kappa = 0.5
+  )
+)
+# Show the fitted variogram on top of the binned variogram (ADELA TEXT)
+plot(vgm, model = v_model)
+print(v_model)
 ```
+
+# Create prediction grid (ALL COMMENTING IS ADELA)
+```{r}
+# Create geo_bounds bounding box for kaz_geo 
+geo_bounds <- st_make_grid(nitrate$geometry, n=1)
+# Plot the bounding box polygon and points
+plot(nitrate$geometry); plot(geo_bounds, add= TRUE) 
+# Find the left bottom corner of the bounding box
+st_bbox(nitrate)
+# Define a 0.5km square grid over the polygon extent. The first parameter is the bottom left corner.
+
+grid <- GridTopology(c(446734,6054448), c(2000, 2000), c(222, 173))
+# Create points with the same coordinate system as the boundary box
+crs(nitrate)
+gridpoints <- SpatialPoints(grid, proj4string = CRS(projection("+proj=utm +zone=35 +datum=WGS84 +units=m +no_defs"))) # CHECK CRS
+
+#UNIQUE
+the_crs <- crs(gridpoints, asText = TRUE)
+nitrate <- st_set_crs(nitrate, the_crs) # Project the "zion"-dataset into the srtm-crs and save it as "zion2".
+#### UNIQUE END
+
+plot(gridpoints); plot(geo_bounds, col = "red", add = TRUE)
+# Crop out the points outside the boundary
+cropped_gridpoints <- crop(gridpoints, as(geo_bounds, "Spatial"))
+plot(cropped_gridpoints);  plot(geo_bounds, col = "red", add = TRUE)
+# Convert to SpatialPixels
+spgrid <- SpatialPixels(cropped_gridpoints)
+coordnames(spgrid) <- c("X", "Y")
+plot(spgrid)
+```
+
+
+# Using fitted variogram model to interpolate new data to the grid
+
+ADELA: "Use the spatial pixel grid of the region, `spgrid`, and the variogram model of OM, `v_model` from previous exercises."
+
+```{r}
+# Adjust the kaz_geo CRS to be consistent with spgrid
+crs(as(nitrate, "Spatial"), asText = TRUE) == crs(spgrid, asText = TRUE)
+# Despite the statement above krige() is erroring out due to CRS misalignment, so forcing it here:
+nitrate_sp <- as(nitrate, "Spatial")
+crs(nitrate_sp) <- crs(spgrid)
+# Do kriging predictions over the grid
+nitrate_grid <- krige(Seneste_mgl ~ X + Y, nitrate_sp, newdata = spgrid, model = v_model)
+# Plot the soil-nutrient predictions in a grid
+
+
+
+#UNIQUE:
+tm_shape(nitrate_grid[1])  +
+  tm_raster(title = "Nitrate mg/l", 
+            style = "cont",
+            palette = "-RdYlGn") +
+  tm_credits(text = "Johan Horsmans & Emil Jessen") +
+  tm_layout(main.title = "Nitrate pollution map")
+###
+
+image(nitrate_grid, col = matlab.like(100))
+contour(nitrate_grid, levels= seq(1, 10, 1), add = TRUE, col = "black")
+print(nitrate_grid)
+# Calculate the probability of organic matter exceeding 7
+nitrate_grid$pFertile <- 1 - pnorm(50, mean = nitrate_grid$var1.pred, sd = sqrt(nitrate_grid$var1.var))
+# Map the probability of soils OM exceeding 7
+spplot(nitrate_grid, zcol = "pFertile")
+# Plot soil-nutrient content estimates with a color ramp
+```
+
+
