@@ -39,8 +39,8 @@
         <li><a href="#installation">Installation</a></li>
       </ul>
     </li>
+    <li><a href="#repository-structure">Repository Structure</a></li>
     <li><a href="#usage">Usage</a></li>
-    <li><a href="#roadmap">Roadmap</a></li>
     <li><a href="#contributing">Contributing</a></li>
     <li><a href="#license">License</a></li>
     <li><a href="#contact">Contact</a></li>
@@ -50,19 +50,37 @@
 
 <!-- ABOUT THE PROJECT -->
 ## About The Project
+
 <img src="analysis_example.png" alt="Logo" width="375" height="295">
 
+This project analyzes the relationship between land use and nitrate pollution in the groundwater in Denmark. It investigates the ... bla. bla...
 
+Why this analysis?
+* Y
+* Y
+* Y
 
+Findings of the analysis:
+* Y
+* Y
+* Y
 
+Of course,
 
+### Built With
 
+This project has been built using already existing publically available software and data. 
+* [RStudio](https://www.rstudio.com/) - Software used for conducting the analysis
+* [GEUS-DATA](https://www.geus.dk/) - Data portal for geological investigations in Denmark/Greenland
+* [Danish Agricultural Agency](https://lbst.dk/landbrug/kort-og-markblokke/) - The Danish Agricultural Agency portal, containing geographical information on land use 
 
+<!-- GETTING STARTED -->
+## Getting Started
 
+To get a local copy up and running follow these simple example steps.
 
+### Prerequisites
 
-
-## Setup for reproduction
 The spatial analysis requires data layers that exceed the maximum filesize on GitHub. To reproduce the analysis the script ```data/data_download.rmd``` has been provided. It will automatically download the files contained within [a Google Drive folder](https://drive.google.com/drive/folders/1ZbnRr2CnVcMm0M2-v3AN7aOMlW5HMXfT?usp=sharing). 
 
 For rerunning the analysis we therefore recommend cloning the repository, as well as using the provided script for downloading the data.
@@ -74,6 +92,7 @@ cd groundwater_pollution_dk/data
 bash data_download.sh
 ```
 
+<!-- REPOSITORY STRUCTURE -->
 ## Repository structure
 This repository has the following directory structure:
 
@@ -85,6 +104,24 @@ This repository has the following directory structure:
 ```data/data_download.sh``` | Script which downloads the data required for the analysis
 ```README.md``` | Readme with instructions
 ```LICENSE``` | [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0) which specifies the permitted usage of the repository
+
+
+<!-- USAGE EXAMPLES -->
+## Usage
+
+For simply examining the analysis and its results, we recommend inspecting the markdown version of the analysis.
+* <a href="groundwater_pollution_dk.md">```spatial_analysis.md```</a>
+
+<!-- CONTRIBUTING -->
+## Contributing
+
+Contributions are what make the open source community such an amazing place to be learn, inspire, and create. Any contributions you make are greatly appreciated.
+
+1. Fork the Project
+2. Create your Feature Branch (`git checkout -b feature/AmazingFeature`)
+3. Commit your Changes (`git commit -m 'Add some AmazingFeature'`)
+4. Push to the Branch (`git push origin feature/AmazingFeature`)
+5. Open a Pull Request
 
 ## Data layers
 After running ```data/data_download.sh``` the data layers will have been downloaded to ```data/```
