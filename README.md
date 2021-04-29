@@ -3,7 +3,7 @@
 <br />
 <p align="center">
   <a href="https://github.com/emiltj/groundwater_pollution_dk">
-    <img src="logo.png" alt="Logo" width="40" height="65">
+    <img src="README_images/logo.png" alt="Logo" width="40" height="65">
   </a>
 
   <h3 align="center">Groundwater pollution and farm use in Denmark</h3>
@@ -55,7 +55,7 @@
 <!-- ABOUT THE PROJECT -->
 ## About The Project
 
-<img src="analysis_example.png" alt="Logo" width="375" height="295">
+<img src="README_images/analysis_example.png" alt="Logo" width="375" height="295">
 
 This project analyzes the relationship between land use and nitrate pollution in the groundwater in Denmark. It investigates the ... bla. bla...
 
