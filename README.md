@@ -11,10 +11,10 @@
   <p align="center">
     Spatial analysis exam project 2021
     <br />
-    <a href="https://github.com/emiltj/groundwater_pollution_dk"><strong>Explore the docs »</strong></a>
+    <a href="https://github.com/emiltj/groundwater_pollution_dk/report.pdf"><strong>Read the report»</strong></a>
     <br />
     <br />
-    <a href="https://github.com/emiltj/groundwater_pollution_dk">View demo</a>
+    <a href="https://github.com/emiltj/groundwater_pollution_dk/groundwater_pollution_dk.md">View markdown</a>
     ·
     <a href="https://github.com/emiltj/groundwater_pollution_dk/issues">Report bug</a>
     ·
@@ -29,9 +29,6 @@
   <ol>
     <li>
       <a href="#about-the-project">About the project</a>
-      <ul>
-        <li><a href="#built-with">Built with</a></li>
-      </ul>
     </li>
     <li>
       <a href="#getting-started">Getting started</a>
@@ -40,9 +37,7 @@
       </ul>
     </li>
     <li><a href="#repository-structure">Repository structure</a></li>
-      <ul>
-        <li><a href="#Data">Data</a></li>
-      </ul>
+    <li><a href="#data">Data</a></li>
     <li><a href="#usage">Usage</a></li>
     <li><a href="#contributing">Contributing</a></li>
     <li><a href="#license">License</a></li>
@@ -70,13 +65,6 @@ Findings of the analysis:
 * Y
 
 Of course,
-
-### Built with
-
-This project has been built using already existing publically available software and data. 
-* [RStudio](https://www.rstudio.com/) - Software used for conducting the analysis
-* [GEUS-DATA](https://www.geus.dk/) - Data portal for geological investigations in Denmark/Greenland
-* [Danish Agricultural Agency](https://lbst.dk/landbrug/kort-og-markblokke/) - The Danish Agricultural Agency portal, containing geographical information on land use 
 
 
 <!-- GETTING STARTED -->
@@ -117,6 +105,9 @@ This repository has the following structure:
 
 
 <!-- USAGE EXAMPLES -->
+## Data
+
+<!-- USAGE EXAMPLES -->
 ## Usage
 
 For simply examining the analysis and its results, we recommend inspecting the markdown version of the analysis.
@@ -149,5 +140,9 @@ You may do so on Slack ([Emil](https://app.slack.com/client/T01908QBS9X/D01A1LFR
 
 <!-- ACKNOWLEDGEMENTS -->
 ## Acknowledgements
-* [README template](https://github.com/othneildrew/Best-README-Template)
-* bla bla
+* [RStudio](https://www.rstudio.com/) - Software used for conducting the analysis
+* [GEUS-DATA](https://www.geus.dk/) - Data portal for geological investigations in Denmark/Greenland
+* [Danish Agricultural Agency](https://lbst.dk/landbrug/kort-og-markblokke/) - The Danish Agricultural Agency portal, containing geographical information on land use 
+* [README template](https://github.com/othneildrew/Best-README-Template) - README template by othneildrew
+* Rstudio
+* Leaflet
