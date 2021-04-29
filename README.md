@@ -121,8 +121,6 @@ The data folder will - after downloading the necessary files - furthermore conta
 ```data/Oekologiske_arealer.*```| Shapefiles containing polygons of organic field in 2018-2021
 
 
-
-
 <!-- USAGE EXAMPLES -->
 ## Usage
 
@@ -141,15 +139,20 @@ Contributions are what make the open source community such an amazing place to b
 4. Push to the Branch (`git push origin feature/AmazingFeature`)
 5. Open a Pull Request
 
-## Data layers
-After running ```data/data_download.sh``` the data layers will have been downloaded to ```data/```
 
-
+<!-- LICENSE -->
 ## License
 Distributed under the [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0). See ```LICENSE``` for more information.
 
 
+<!-- CONTACT -->
 ## Contact
 
 Feel free to write the authors, Emil Jessen or Johan Horsmans for any questions regarding the scripts.
 You may do so on Slack ([Emil](https://app.slack.com/client/T01908QBS9X/D01A1LFRDE0), [Johan](google.dk))
+
+
+<!-- ACKNOWLEDGEMENTS -->
+## Acknowledgements
+* [README template](https://github.com/othneildrew/Best-README-Template)
+* bla bla
