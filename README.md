@@ -108,17 +108,12 @@ This repository has the following structure:
 ```spatial_analysis.rmd```| Script used for the spatial analysis
 ```data/``` | Folder which contains the data required for the analysis
 ```data/data_download.sh``` | Script which downloads the data required for the analysis
-```README.md``` | Readme with instructions
-```LICENSE``` | [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0) which specifies the permitted usage of the repository
-
-### Data
-The data folder will - after downloading the necessary files - furthermore contain additional files
-| Column | Description|
-|--------|:-----------|
 ```data/nitrat.csv```| Groundwater samples containing information on nitrate and geographical coordinates of samples in the period 1900-2021.
 ```data/REGION.*```| Shapefiles containing a map of Denmark, by regions.
 ```data/Markblok.*```| Shapefiles containing polygons of fields in Denmark in the period 1990-2021.
 ```data/Oekologiske_arealer.*```| Shapefiles containing polygons of organic field in 2018-2021
+```README.md``` | Readme with instructions
+```LICENSE``` | [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0) which specifies the permitted usage of the repository
 
 
 <!-- USAGE EXAMPLES -->
