@@ -111,8 +111,7 @@ This repository has the following structure:
 ```data/REGION.*```| Shapefiles containing a map of Denmark, by regions.
 ```data/Markblok.*```| Shapefiles containing polygons of fields in Denmark in the period 1990-2021.
 ```data/Oekologiske_arealer.*```| Shapefiles containing polygons of organic field in 2018-2021
-```README_images/logo.png```| Logo used for README
-```README_images/analysis_example.png```| Image example of analysis used for README
+```README_images/*.png```| Images used for the README
 ```README.md``` | Readme with instructions
 ```LICENSE``` | [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0) which specifies the permitted usage of the repository
 
