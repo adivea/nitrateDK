@@ -22,6 +22,7 @@
   </p>
 </p>
 
+
 <!-- TABLE OF CONTENTS -->
 <details open="open">
   <summary>Table of Contents</summary>
@@ -36,10 +37,12 @@
       <a href="#getting-started">Getting Started</a>
       <ul>
         <li><a href="#prerequisites">Prerequisites</a></li>
-        <li><a href="#installation">Installation</a></li>
       </ul>
     </li>
     <li><a href="#repository-structure">Repository Structure</a></li>
+      <ul>
+        <li><a href="#Data">Data</a></li>
+      </ul>
     <li><a href="#usage">Usage</a></li>
     <li><a href="#contributing">Contributing</a></li>
     <li><a href="#license">License</a></li>
@@ -47,6 +50,7 @@
     <li><a href="#acknowledgements">Acknowledgements</a></li>
   </ol>
 </details>
+
 
 <!-- ABOUT THE PROJECT -->
 ## About The Project
@@ -74,6 +78,7 @@ This project has been built using already existing publically available software
 * [GEUS-DATA](https://www.geus.dk/) - Data portal for geological investigations in Denmark/Greenland
 * [Danish Agricultural Agency](https://lbst.dk/landbrug/kort-og-markblokke/) - The Danish Agricultural Agency portal, containing geographical information on land use 
 
+
 <!-- GETTING STARTED -->
 ## Getting Started
 
@@ -92,9 +97,10 @@ cd groundwater_pollution_dk/data
 bash data_download.sh
 ```
 
+
 <!-- REPOSITORY STRUCTURE -->
 ## Repository structure
-This repository has the following directory structure:
+This repository has the following structure:
 
 | Column | Description|
 |--------|:-----------|
@@ -105,12 +111,24 @@ This repository has the following directory structure:
 ```README.md``` | Readme with instructions
 ```LICENSE``` | [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0) which specifies the permitted usage of the repository
 
+### Data
+The data folder will - after downloading the necessary files - furthermore contain additional files
+| Column | Description|
+|--------|:-----------|
+```data/nitrat.csv```| Groundwater samples containing information on nitrate and geographical coordinates of samples in the period 1900-2021.
+```data/REGION.*```| Shapefiles containing a map of Denmark, by regions.
+```data/Markblok.*```| Shapefiles containing polygons of fields in Denmark in the period 1990-2021.
+```data/Oekologiske_arealer.*```| Shapefiles containing polygons of organic field in 2018-2021
+
+
+
 
 <!-- USAGE EXAMPLES -->
 ## Usage
 
 For simply examining the analysis and its results, we recommend inspecting the markdown version of the analysis.
 * <a href="groundwater_pollution_dk.md">```spatial_analysis.md```</a>
+
 
 <!-- CONTRIBUTING -->
 ## Contributing
@@ -126,7 +144,6 @@ Contributions are what make the open source community such an amazing place to b
 ## Data layers
 After running ```data/data_download.sh``` the data layers will have been downloaded to ```data/```
 
-## Contributions
 
 ## License
 Distributed under the [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0). See ```LICENSE``` for more information.
