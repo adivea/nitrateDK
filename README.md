@@ -1,5 +1,39 @@
-# Groundwater pollution and land use - Spatial Analytics exam project - Spring 2021
-This repository contains the exam project on the relationship between groundwater polution and farms in Denmark
+
+<!-- PROJECT LOGO -->
+<br />
+<p align="center">
+  <a href="https://github.com/emiltj/groundwater_pollution_dk">
+    <img src="logo.png" alt="Logo" width="40" height="80">
+  </a>
+
+  <h3 align="center">Groundwater pollution and farm use in Denmark</h3>
+
+  <p align="center">
+    Spatial analysis exam project 2021
+    <br />
+    <a href="https://github.com/emiltj/groundwater_pollution_dk"><strong>Explore the docs »</strong></a>
+    <br />
+    <br />
+    <a href="https://github.com/emiltj/groundwater_pollution_dk">View Demo</a>
+    ·
+    <a href="https://github.com/emiltj/groundwater_pollution_dk/issues">Report Bug</a>
+    ·
+    <a href="https://github.com/emiltj/groundwater_pollution_dk/issues">Request Feature</a>
+  </p>
+</p>
+
+## About The Project
+<img src="analysis_example.png" alt="Logo" width="750" height="590">
+
+
+
+
+
+
+
+
+
+
 
 ## Setup for reproduction
 The spatial analysis requires data layers that exceed the maximum filesize on GitHub. To reproduce the analysis the script ```data/data_download.rmd``` has been provided. It will automatically download the files contained within [a Google Drive folder](https://drive.google.com/drive/folders/1ZbnRr2CnVcMm0M2-v3AN7aOMlW5HMXfT?usp=sharing). 
