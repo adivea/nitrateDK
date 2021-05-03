@@ -2,19 +2,27 @@
 library(pacman)
 
 p_load(sf, raster, dplyr, tmap, ggplot2, tidyverse)
+
+# Install the package
+install.packages("lubridate")
+# Load the package
+library(lubridate)
 ```
 
 ```{r}
-nitrate <- as.data.frame(read_csv("nitrate/nitrate.csv")) #Load the .csv-file as a dataframe and save it as "cities".
+nitrate <- as.data.frame(read_csv("data/nitrate.csv")) #Load the .csv-file as a dataframe and save it as "cities".
 
-nitrateagg <- as.data.frame(read_csv("nitrate/nitrate aggregated.csv")) #Load the .csv-file as a dataframe and save it as "cities".
-
-
-nitrate <- raster("http://data.geus.dk/geusmap/ows/25832.jsp?mapname=nitrat_2mg_and_above_aggr&whoami=horsmans1004@gmail.com") #Load the .csv-file as a dataframe and save it as "cities".
+nitrateagg <- as.data.frame(read_csv("data/nitrate aggregated.csv")) #Load the .csv-file as a dataframe and save it as "cities".
 
 
-nitrate_shape <- st_read("nitrat_2mg_and_above.shp")
+nitrate$seneste<-nitrate$`Seneste mg/l`
+
+#nitrate<-nitrate[1:1000,]
+#nitrate<-nitrate[!duplicated(nitrate$seneste), ]
+
+
 ```
+
 ```{r}
 #Remove shit from point column
 
@@ -34,12 +42,22 @@ test2 <- test %>%
 ```
 
 ```{r}
-test3 <- st_as_sf(test2, coords = c("longitude", "latitude"))
+nitrate <- st_as_sf(test2, coords = c("longitude", "latitude"))
 
 ```
 
 ```{r}
-plot(st_geometry(test3))
+nitrate <- nitrate %>%
+ select(Seneste, seneste, geometry) %>%
+ filter(Seneste >= as.Date("2018-01-01") & Seneste <= as.Date("2021-03-10"))
+```
+
+
+```{r}
+nitrate<-nitrate[!duplicated(nitrate$geometry), ]
+
+
+plot(st_geometry(nitrate))
 ```
 
 #Agg
@@ -69,4 +87,449 @@ marker <- st_read("farm_layers/Markblok.shp") %>% na.omit() #loading raster cont
 tm_shape(marker) + tm_polygons() #Plotting mounds.
 
 ```
+
+# ADELA
+
+# AUTO KRIGING
+```{r}
+kaz_geo <- read_csv("kriging data/KAZ_geo.csv")
+kaz_geo <- st_as_sf(kaz_geo, coords = c("Long", "Lat"), crs = 4326)
+kaz_geo <- st_transform(kaz_geo, crs = 32635)
+
+kaz_sites <- st_read("kriging data/KAZ_scatterpoints.shp")
+st_crs(kaz_sites)
+# See what OM_muns measurements are at each location
+plot(kaz_geo$geometry)
+# Get a summary of the organic matter (OM) values
+summary(kaz_geo$OM_muns)
+# Look at the distribution
+hist(kaz_geo$OM_muns)
+# Plot a map of organic matter
+ggplot(kaz_geo) +
+  geom_sf(aes(col = OM_muns)) 
+#+
+ # geom_sf(data=kaz_sites, aes())
+# Plot both the sampled and unsampled locations
+plot(kaz_geo$geometry); plot(kaz_sites$geometry, col = "red", add =TRUE)
+```
+
+It's a little tricky to see spatial trends from the ggplot. Let's see how we can make the patterns clearer.
+
+
+#JOHAN
+
+```{r}
+summary(nitrate$seneste)
+```
+
+```{r}
+hist(nitrate$seneste)
+
+```
+
+```{r}
+ggplot(nitrate) +
+  geom_sf(aes(col = seneste)) 
+```
+
+
+#BACK TO ADELA'S CODE
+
+## Task 2: Fitting a trend surface
+The  data shows OM broadly increasing from south-east to north-west. Fitting a linear model with the coordinates as covariates will interpolate a flat plane through the values.
+
+
+```{r fit-model, eval=FALSE}
+# Are there coordinates and what are they called?
+names(kaz_geo)
+kaz_geo$X <- st_coordinates(kaz_geo)[,1]
+kaz_geo$Y <- st_coordinates(kaz_geo)[,2]
+# Complete the formula
+m_trend <- lm(OM_muns ~ X + Y , kaz_geo)
+# Check the coefficients
+summary(m_trend)
+```
+There seems to be a significant trend! Linear regressions are a good first model for exploring many datasets.
+
+#JOHAN
+
+```{r fit-model, eval=FALSE}
+# Are there coordinates and what are they called?
+names(nitrate)
+nitrate$X <- st_coordinates(nitrate)[,1]
+nitrate$Y <- st_coordinates(nitrate)[,2]
+# Complete the formula
+m_trend <- lm(seneste ~ X + Y , nitrate)
+# Check the coefficients
+summary(m_trend)
+```
+
+#ADELA
+
+## Task 3: Predicting from a trend surface
+Your next task is to compute the soil nutrient content at the ancient village locations. You can use the `predict()` function on the fitted model `m_trend` from the previous chunk for this.
+
+### Instructions
+
+
+
+```{r predict, eval=FALSE}
+# Create a data frame of missing data
+kaz_geo_miss <- kaz_sites %>% 
+  mutate(X = st_coordinates(.)[,1], 
+         Y = st_coordinates(.)[,2], 
+         OM = "NA", 
+         ID = as.numeric(TRAP_Code)) %>% 
+  dplyr::select(ID, X, Y, OM)
+# Predict OM for the missing data
+predictions <- predict(m_trend, newdata = kaz_geo_miss, se.fit = TRUE)
+kaz_geo_miss$OM <- predictions$fit
+# Compute the exceedance probability
+pFertile <- 1 - pnorm(5, mean = predictions$fit, sd = predictions$se.fit)
+hist(pFertile)
+```
+
+
+Filling in the gaps and calculating exceeding values is an important task in many industries.
+
+Plot the result!
+
+```{r}
+ggplot(kaz_geo_miss) + 
+  geom_sf(aes(color = OM)) +
+  geom_sf(data=kaz_geo, aes(color = OM_muns))
+```
+
+Beautiful! Now you know what the soil nutrient values at your ancient site centroids estimated through a linear trend following a gaussian distribution. But what if you want to take into account spatial weighting?  or, wanted to have not only a point but an entire field of values in the radius of ancient village centroids?
+
+NOT RELEVANT
+
+# ADELA CONTINUED:
+
+## Task 4: Variogram estimation
+You can use the `gstat` package to plot variogram clouds and the variograms from data. Recall:
+
+* The *variogram cloud* shows the differences of the measurements against distance for all pairs of data points.
+* The *binned variogram* divides the cloud into distance bins and computes the average difference within each bin.
+
+The y-range of the binned variogram is always much smaller than the variogram cloud because the cloud includes the full range of values that go into computing the mean for the binned variogram.
+
+### Instructions
+
+* You should have the geochem survey data, `kaz_geo` in the memory.
+* The gstat `variogram()` function uses the `cloud` argument to plot a variogram cloud. 
+* The data is in meters, so use a 10km cutoff to prevent the cloud from being too dense.
+* Plot a binned variogram of the non-missing data - the default `cloud` parameter is `FALSE`.
+
+```{r binned-vgm, eval = FALSE}
+# Load gstat and sp library
+library(gstat)
+library(sp)
+library(raster)
+# Make a cloud from the non-missing data up to 10km
+plot(variogram(OM_muns ~ 1, kaz_geo, cloud = TRUE, cutoff = 10000))
+# Make a variogram of the non-missing data
+plot(variogram(OM_muns ~ 1, kaz_geo))
+```
+
+
+In the binned variogram you can see that measurements from sites that are further away from each other are more different.
+
+# JOHAN:
+
+```{r binned-vgm, eval = FALSE}
+
+# Load gstat and sp library
+library(gstat)
+library(sp)
+library(raster)
+# Make a cloud from the non-missing data up to 10km
+plot(variogram(nitrate$seneste ~ 1, nitrate, cloud = TRUE, cutoff = 10000))
+# Make a variogram of the non-missing data
+plot(variogram(nitrate$seneste ~ 1, nitrate))
+```
+
+
+In the binned variogram you can see that measurements from sites that are further away from each other are more different.
+
+# ADELA
+
+## Task 5: Variogram with spatial trend
+You might imagine that if soil at a particular point is nutrient-rich, then soil one metre away is likely to be fertile too. But can you say the same thing about soil one kilometre away, or ten kilometres, or one hundred kilometres?
+
+The shape of the previous variogram tells you there is a large-scale trend in the data. You can fit a variogram considering this trend with `gstat`. This variogram should flatten out, indicating there is no more spatial correlation after a certain distance with the trend taken into account.
+
+### Instructions
+* Use the organic matter in survey data, `kaz_geo` 
+* Set the formula for the variogram so that the `OM_muns` value depends on the coordinates.
+
+```{r variogram-spatial, eval = FALSE}
+# Remember what projected coordinates are called?
+# The OM_muns depends on the coordinates
+OM_vgm <- variogram(OM_muns ~ X + Y, kaz_geo)
+plot(OM_vgm)
+```
+
+
+The plot first levels off after around 4000m, indicating that there appears to be little spatial correlation beyond that distance.
+
+# JOHAN:
+
+
+```{r variogram-spatial, eval = FALSE}
+# Remember what projected coordinates are called?
+# The OM_muns depends on the coordinates
+OM_vgm <- variogram(nitrate$seneste ~ X + Y, nitrate)
+plot(OM_vgm)
+```
+ 
+ # ADELA & JOHAN:
+ 
+ ## Task 6: Variogram model fitting
+Next you'll fit a model to your variogram. The `gstat` function `fit.variogram()` does this. You need to give it some initial values as a starting point for the optimization algorithm to fit a better model.
+
+The sill is the the upper limit of the model. That is, the long-range largest value, ignoring any outliers.
+
+### Instructions
+
+* You will be using the `OM_vgm` from the previous exercise.
+* Estimate some parameters by eyeballing the plot.
+  - The `nugget` is the value of the semivariance at zero distance.
+  - The partial sill, `psill` is the difference between the sill and the nugget.
+  - Set the `range` to the distance where the model first begins to flattens out.     
+* Fit a variogram model by calling `fit.variogram()`.
+  - The second argument should take the parameters you estimated, wrapped in a call to `vgm()`.
+* Plot the binned variogram.
+
+```{r vgm-fitting, eval = FALSE}
+# Look at the OM_vgm plot, again. 
+plot(OM_vgm)
+# Eyeball the variogram and estimate the initial parameters
+nugget <- 2.4
+psill <- 2.6
+range <- 4000
+# Fit the variogram
+v_model <- fit.variogram(
+  OM_vgm, 
+  model = vgm(
+    model = "Ste",
+    nugget = nugget,
+    psill = psill,
+    range = range,
+    kappa = 0.5
+  )
+)
+# Show the fitted variogram on top of the binned variogram
+plot(OM_vgm, model = v_model)
+print(v_model)
+```
+
+
+Plotting a smooth model prediction helps you ignore measurement errors to more easily see the distance at which spatial correlation no longer occurs. You can also apply this model to interpolating the missing values from spatial trends present in existing data, in the next exercise. 
+
+#ADELA 
+
+## Task 1: Kriging: Filling in the gaps
+Now that you have generated a variogram from the locations with existing geochemical data, you can apply it to produce estimates at new locations. You can estimate new values at individual points or across the entire area of the valley, using kriging. 
+
+Kriging is the final part of geostatical estimation. This is the application of the variogram along with the sampled data points to produce estimates and uncertainties at new locations.
+
+The computation of estimates and uncertainties, together with the assumption of a normal (Gaussian) response means you can compute any function of the estimates - for example the probability of a new location having highly fertile soil.
+
+### Instructions
+
+* The geochemical survey data `kaz_geo`, the dataframe with the missing values `kaz_geo_miss` and the variogram model `v_model`, were created in the previous exercise and should be in your environment.
+* You will need to load the `gstat`, `sf`, and `raster` libraries.
+* Complete the formula to indicate kriging with a spatial trend surface.
+* Use the `kaz_geo_miss` as `newdata` locations.
+* Plot the predicted organic matter from the returned object using ggplot() or spplot().
+
+```{r start kriging, eval=FALSE} 
+# Reload kaz_geo, missing value dataframe and the v_model
+kaz_geo
+# Set the trend formula and the new data
+km <- krige(OM ~ X + Y, kaz_geo, newdata = kaz_geo_miss, model = v_model)
+names(km)
+# Plot the predicted values
+ggplot(km) +
+  geom_sf(aes(col = var1.pred))
+# Compute the probability of highly fertile soil samples, and map
+km$pFertile <- 1 - pnorm(7, mean = km$var1.pred, sd = sqrt(km$var1.var))
+spplot(as(km, "Spatial"), "pFertile")
+```
+
+Well done on filling in the missing values using the previously generated variogram! Next you'll see how to go from point predictions to gridded predictions.
+
+# ADELA 
+## Task 2: Making a prediction grid
+Past farmers used the fields around their villages. In order to evaluate their settlement choices, you need a map of soil probability that spans the valley rather than just village centroids.
+To do this, you are going to do some kriging using the `krige()` function over the study area. This requires a grid, or rather, a `SpatialPixels` object which will take a bit of data manipulation to create. You start by defining a grid, creating points on that grid, cropping to the study region, and then finally converting to `SpatialPixels`. On the way, you'll meet some new functions.
+
+`GridTopology()` defines a rectangular grid. It takes three vectors of length two as inputs. The first specifies the position of the bottom left corner of the grid. The second specifies the width and height of each rectangle in the grid, and the third specifies the number of rectangles in each direction.
+
+To ensure that the grid and the study area have the same coordinates, some housekeeping is involved. `SpatialPoints()` converts the points to a coordinate reference system (CRS), or projection (different packages use different terminology for the same concept). The CRS is created by wrapping the study area in `projection()`, then in `CRS()`. This data manipulation is necessary to align the grid and the study area.
+
+Now that you have that alignment, `crop()`, as the name suggests, crops the grid to the study area.
+
+Finally, `SpatialPixels()` converts the raster cropped `gridpoints` to the equivalent `sp` object.
+
+### Instructions
+
+* Keep using the geochemical survey data `kaz_geo`, the missing value dataframe, `kaz_geo_miss`, the variogram,` vgm`, and the variogram model, `v_model` from previous exercises.
+* Create the bounding box for the study area and assign to an object called `geo_bounds`.
+* Use `st_bbox(geo_bounds)` to get the corners of the grid.
+* Construct a rectangular grid over the region.
+  - Call `GridTopology()`.
+  - Round the position of the bottom left corner to the nearest integer and pass it as the first argument.
+  - Assign the result to grid.        
+* Align the grid coordinate with the study area boundary coordinates.
+  - Call `SpatialPoints()`.
+  - Pass `grid` as the first argument.
+  - Pass the coordinate reference system of the study area boundary to the `proj4string` argument.
+  - Assign the result to `gridpoints`.
+  - Plot this object to see your progress.
+* Crop the grid points to the shape of the boundary object.
+  - Call `crop()`.
+  - Pass the grid points as the first argument.
+  - Pass the study area boundary as the second argument.
+  - Assign the result to `cropped_gridpoints`.
+  - Plot this object to see your progress.
+* Convert the cropped grid points to a `SpatialPixels` object.
+  - Call `SpatialPixels()`.
+  - Pass `cropped_gridpoints` as the only argument.
+  - Assign the result to `spgrid`.
+  - Plot this object to see your progress.
+  
+```{r create-grid, eval=FALSE}
+# Create geo_bounds bounding box for kaz_geo 
+library(sf)
+geo_bounds <- st_make_grid(kaz_geo$geometry, n=1)
+# Plot the bounding box polygon and points
+plot(kaz_geo$geometry); plot(geo_bounds, add= TRUE) 
+# Find the left bottom corner of the bounding box
+st_bbox(kaz_geo)
+# Define a 0.5km square grid over the polygon extent. The first parameter is the bottom left corner.
+grid <- GridTopology(c(352042.5,4712740.7), c(500, 500), c(35, 40))
+# Create points with the same coordinate system as the boundary box
+crs(kaz_geo)
+gridpoints <- SpatialPoints(grid, proj4string = CRS(projection("+proj=utm +zone=35 +datum=WGS84 +units=m +no_defs")))
+plot(gridpoints); plot(geo_bounds, col = "red", add = TRUE)
+# Crop out the points outside the boundary
+cropped_gridpoints <- crop(gridpoints, as(geo_bounds, "Spatial"))
+plot(cropped_gridpoints);  plot(geo_bounds, col = "red", add = TRUE)
+# Convert to SpatialPixels
+spgrid <- SpatialPixels(cropped_gridpoints)
+coordnames(spgrid) <- c("X", "Y")
+plot(spgrid)
+```
+
+
+Good effort! Manipulating the data into the right form can be hard work. Now you have what you want, you can do some gridded kriging!
+
+# JOHAN: 
+
+```{r create-grid, eval=FALSE}
+# Create geo_bounds bounding box for kaz_geo 
+library(sf)
+geo_bounds <- st_make_grid(nitrate$geometry, n=1)
+# Plot the bounding box polygon and points
+plot(nitrate$geometry); plot(geo_bounds, add= TRUE) 
+# Find the left bottom corner of the bounding box
+st_bbox(nitrate)
+# Define a 0.5km square grid over the polygon extent. The first parameter is the bottom left corner.
+
+grid <- GridTopology(c(446734,6054448), c(2000, 2000), c(222, 173))
+# Create points with the same coordinate system as the boundary box
+crs(nitrate)
+gridpoints <- SpatialPoints(grid, proj4string = CRS(projection("+proj=utm +zone=35 +datum=WGS84 +units=m +no_defs"))) # CHECK CRS
+
+#UNIQUE
+the_crs <- crs(gridpoints, asText = TRUE)
+nitrate <- st_set_crs(nitrate, the_crs) # Project the "zion"-dataset into the srtm-crs and save it as "zion2".
+#### UNIQUE END
+
+plot(gridpoints); plot(geo_bounds, col = "red", add = TRUE)
+# Crop out the points outside the boundary
+cropped_gridpoints <- crop(gridpoints, as(geo_bounds, "Spatial"))
+plot(cropped_gridpoints);  plot(geo_bounds, col = "red", add = TRUE)
+# Convert to SpatialPixels
+spgrid <- SpatialPixels(cropped_gridpoints)
+coordnames(spgrid) <- c("X", "Y")
+plot(spgrid)
+```
+
+
+Good effort! Manipulating the data into the right form can be hard work. Now you have what you want, you can do some gridded kriging!
+
+
+# ADELA: 
+## Task 3: Gridded predictions
+Constructing the grid is the hard part done. You can now compute `kriged` estimates over the grid using the variogram model from before (`v_model`) and the grid of `SpatialPixels`.
+
+### Instructions
+
+Use the spatial pixel grid of the region, `spgrid`, and the variogram model of OM, `v_model` from previous exercises.
+
+* Ensure that the `spgrid` and `kaz_geo` objects have the same coordinate system definition with CRS() function.
+* Use kriging to predict OM in each grid rectangle throughout the study area.
+  - Call `krige()`.
+  - The formula and input data are already specified.
+  - Pass `spgrid` as the new data to predict.
+  - Pass the variogram model to the model argument.
+* Calculate the probability of fertile soil samples in each grid rectangle.
+  - The mean of the predictions is the `var1.pred` element of `OM_grid`.
+  - The variance of the predictions is the `var1.var` element of `OM_grid`. Take the square root to get the standard deviation.
+* Plot the organic matter in each grid rectangle.
+  - Call `spplot()`.
+  - Pass the organic matter column to the `zcol` argument as a string
+
+```{r kriging over grid task, eval=FALSE}
+# Adjust the kaz_geo CRS to be consistent with spgrid
+crs(as(kaz_geo, "Spatial"), asText = TRUE) == crs(spgrid, asText = TRUE)
+# Despite the statement above krige() is erroring out due to CRS misalignment, so forcing it here:
+kaz_geo_sp <- as(kaz_geo, "Spatial")
+crs(kaz_geo_sp) <- crs(spgrid)
+# Do kriging predictions over the grid
+library(gstat)
+OM_grid <- krige(OM_muns ~ X + Y, kaz_geo_sp, newdata = spgrid, model = v_model)
+# Plot the soil-nutrient predictions in a grid
+image(OM_grid, col = rainbow(100))
+contour(OM_grid, levels= seq(1, 10, 1), add = TRUE, col = "black")
+print(OM_grid)
+# Calculate the probability of organic matter exceeding 7
+OM_grid$pFertile <- 1 - pnorm(7, mean = OM_grid$var1.pred, sd = sqrt(OM_grid$var1.var))
+# Map the probability of soils OM exceeding 7
+spplot(OM_grid, zcol = "pFertile")
+# Plot soil-nutrient content estimates with a color ramp
+```
+
+The regions with fertile soil samples are much clearer than in the maps of points that you saw at the start of the chapter.
+
+
+
+# JOHAN
+
+
+```{r kriging over grid task, eval=FALSE}
+
+# Adjust the kaz_geo CRS to be consistent with spgrid
+crs(as(nitrate, "Spatial"), asText = TRUE) == crs(spgrid, asText = TRUE)
+# Despite the statement above krige() is erroring out due to CRS misalignment, so forcing it here:
+nitrate_sp <- as(nitrate, "Spatial")
+crs(nitrate_sp) <- crs(spgrid)
+# Do kriging predictions over the grid
+library(gstat)
+OM_grid <- krige(seneste ~ X + Y, nitrate_sp, newdata = spgrid, model = v_model)
+# Plot the soil-nutrient predictions in a grid
+image(OM_grid, col = rainbow(1000))
+contour(OM_grid, levels= seq(1, 10, 1), add = TRUE, col = "black")
+print(OM_grid)
+# Calculate the probability of organic matter exceeding 7
+OM_grid$pFertile <- 1 - pnorm(50, mean = OM_grid$var1.pred, sd = sqrt(OM_grid$var1.var))
+# Map the probability of soils OM exceeding 7
+spplot(OM_grid, zcol = "pFertile")
+# Plot soil-nutrient content estimates with a color ramp
+```
+
+The regions with fertile soil samples are much clearer than in the maps of points that you saw at the start of the chapter.
 
