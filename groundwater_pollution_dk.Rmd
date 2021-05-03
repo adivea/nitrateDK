@@ -44,6 +44,42 @@ Making it a shapefile
 nitrate <- st_as_sf(nitrate, coords = c("longitude", "latitude"))
 ```
 
+```{r}
+markblok<-st_read("data/Markblok.shp") %>% na.omit()
+okologimark<-st_read("data/Oekologiske_arealer_2019.shp") %>% na.omit()
+
+
+head(markblok)
+head(okologimark)
+head(nitrate)
+```
+# Plotting fields
+```{r}
+plot(st_geometry(okologimark))
+plot(st_geometry(markblok))
+```
+
+
+Setting CRS
+```{r}
+# Set the projection of the nitrate data as EPSG 25832
+nitrate <- st_set_crs(nitrate, value = 25832)
+okologimark <- st_set_crs(okologimark, value = 25832)
+markblok <- st_set_crs(markblok, value = 25832)
+
+# Transform the geometry of the data to the assigned CRS. 
+nitrate <- st_transform(nitrate, crs=25832)
+markblok <- st_transform(markblok, crs=25832)
+okologimark <- st_transform(okologimark, crs = 25832)
+
+# Verify the projection is 'projected' not 'geographic'
+head(nitrate) 
+head(markblok)
+head(okologimark)
+```
+
+
+
 Filtering dates between 2018 and 2021:
 ```{r}
 nitrate <- nitrate %>%
@@ -56,10 +92,21 @@ Remove duplicate entries (for the purpose of kriging)
 nitrate<-nitrate[!duplicated(nitrate$geometry), ]
 ```
 
-
 Plotting the points
 ```{r}
-plot(st_geometry(nitrate))
+plot(st_geometry(nitrate), pch = 16, cex = 0.4)
+```
+
+Plotting points on top of organic fields (to assess CRS allignment)
+```{r}
+plot(st_geometry(nitrate), pch = 16, cex = 0.4, col = "red")
+plot(st_geometry(okologimark), add = TRUE)
+```
+
+Plotting points on top of all fields (to assess CRS allignment)
+```{r}
+plot(st_geometry(markblok))
+plot(st_geometry(nitrate), add = TRUE, pch = 16, cex = 0.4, col = "red")
 ```
 
 
@@ -133,11 +180,11 @@ st_bbox(nitrate)
 grid <- GridTopology(c(446734,6054448), c(2000, 2000), c(222, 173))
 # Create points with the same coordinate system as the boundary box
 crs(nitrate)
-gridpoints <- SpatialPoints(grid, proj4string = CRS(projection("+proj=utm +zone=35 +datum=WGS84 +units=m +no_defs"))) # CHECK CRS
+gridpoints <- SpatialPoints(grid, proj4string = CRS(projection("+proj=utm +zone=32 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs "))) # CHECK CRS
 
 #UNIQUE
-the_crs <- crs(gridpoints, asText = TRUE)
-nitrate <- st_set_crs(nitrate, the_crs) # Project the "zion"-dataset into the srtm-crs and save it as "zion2".
+#the_crs <- crs(nitrate, asText = TRUE)
+#gridpoints <- st_set_crs(gridpoints, the_crs) # Project the "zion"-dataset into the srtm-crs and save it as "zion2".
 #### UNIQUE END
 
 plot(gridpoints); plot(geo_bounds, col = "red", add = TRUE)
@@ -168,12 +215,21 @@ nitrate_grid <- krige(Seneste_mgl ~ X + Y, nitrate_sp, newdata = spgrid, model =
 
 
 #UNIQUE:
+#Plotting raster:
 tm_shape(nitrate_grid[1])  +
   tm_raster(title = "Nitrate mg/l", 
             style = "cont",
             palette = "-RdYlGn") +
   tm_credits(text = "Johan Horsmans & Emil Jessen") +
   tm_layout(main.title = "Nitrate pollution map")
+
+#Points overlayed on raster:
+tm_shape(nitrate_grid[1])  +
+  tm_raster(title = "Nitrate mg/l", 
+            style = "cont",
+            palette = "-RdYlGn") +
+tm_shape(nitrate) +
+  tm_dots()
 ###
 
 #image(nitrate_grid, col = matlab.like(100))
