@@ -78,12 +78,10 @@ head(markblok)
 head(okologimark)
 ```
 
-
-
 Filtering dates between 2018 and 2021:
 ```{r}
 nitrate <- nitrate %>%
- select(Seneste_måling, Seneste_mgl, geometry) %>%
+ select(Seneste_måling, Seneste_mgl, geometry, `Indtag topdybde`) %>%
  filter(Seneste_måling >= as.Date("2018-01-01") & Seneste_måling <= as.Date("2021-03-10"))
 ```
 
@@ -112,6 +110,13 @@ plot(st_geometry(nitrate), add = TRUE, pch = 16, cex = 0.4, col = "red")
 
 #Exploratory statistics:
 
+Depth:
+```{r}
+summary(nitrate$`Indtag topdybde`)
+sd(nitrate$`Indtag topdybde`)
+```
+
+Nitrate:
 ```{r}
 summary(nitrate$Seneste_mgl)
 ```
@@ -122,7 +127,7 @@ hist(nitrate$Seneste_mgl)
 Plotting points with nitrate per. mg/l metric:
 ```{r}
 ggplot(nitrate) +
-  geom_sf(aes(col = Seneste_mgl)) 
+  geom_sf(aes(col = Seneste_mgl))
 ```
 
 # Kriging:
@@ -232,14 +237,6 @@ tm_shape(nitrate) +
   tm_dots()
 ###
 
-#image(nitrate_grid, col = matlab.like(100))
-#contour(nitrate_grid, levels= seq(1, 10, 1), add = TRUE, col = "black")
-#print(nitrate_grid)
-# Calculate the probability of organic matter exceeding 7
-#nitrate_grid$pFertile <- 1 - pnorm(50, mean = nitrate_grid$var1.pred, sd = sqrt(nitrate_grid$var1.var))
-# Map the probability of soils OM exceeding 7
-#spplot(nitrate_grid, zcol = "pFertile")
-# Plot soil-nutrient content estimates with a color ramp
 ```
 
 
