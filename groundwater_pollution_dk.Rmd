@@ -59,6 +59,48 @@ plot(st_geometry(okologimark))
 plot(st_geometry(markblok))
 ```
 
+# Emils code trying to fix okologimarker! #
+```{r}
+# Looking at original data -> It appears more than 1000 fields are registered (which is > our dataset)
+https://miljoegis.mim.dk/spatialmap?profile=lbst
+
+# Too few fields are apparent here in R (regardless of plotting method )
+plot(st_geometry(okologimark))
+tm_shape(okologimark) + tm_polygons()
+
+# Enough rows do not seem to be included
+nrow(markblok)
+nrow(okologimark)
+length(st_geometry(okologimark))
+
+# Subsetting df to only include "Omlægningsdato efter 31/5-2019", as shown on website
+str(okologimark$Omlaegning)
+new_okologimark = okologimark %>%
+ filter(Omlaegning >= as.Date("2019-05-31"))
+
+# Plotting only the new omlaegning
+plot(st_geometry(new_okologimark))
+tm_shape(new_okologimark) + tm_polygons()
+
+# Inspecting the individual rows of "geometry"
+print(okologimark$geometry[1,])[1][1][1]
+
+# Method for merging different okologimarker in case we need it
+okologimark18 <-st_read("data/Oekologiske_arealer_2018.shp") %>% na.omit()
+okologimark19 <-st_read("data/Oekologiske_arealer_2019.shp") %>% na.omit()
+nrow(okologimark18)
+nrow(okologimark19)
+
+okologimark18 = st_combine(okologimark18)
+okologimark19 = st_combine(okologimark19)
+okologimark1819 = st_union(okologimark18, okologimark19)
+plot(st_geometry(okologimark1819))
+
+plot(st_geometry(okologimark1819))
+
+```
+
+
 
 Setting CRS
 ```{r}
