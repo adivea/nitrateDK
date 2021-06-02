@@ -49,7 +49,38 @@ nitrate <- st_as_sf(nitrate, coords = c("longitude", "latitude"))
 ### Loading land-use data.
 ```{r}
 markblok<-st_read("data/Markblok.shp") %>% na.omit()
-okologimark<-st_read("data/Oekologiske_arealer_2019.shp") %>% na.omit()
+
+okologimark_2012<-st_read("data/Oekologiske_arealer_2012.shp") %>% na.omit()
+okologimark_2013<-st_read("data/Oekologiske_arealer_2013.shp") %>% na.omit()
+okologimark_2014<-st_read("data/Oekologiske_arealer_2014.shp") %>% na.omit()
+okologimark_2015<-st_read("data/Oekologiske_arealer_2015.shp") %>% na.omit()
+okologimark_2016<-st_read("data/Oekologiske_arealer_2016.shp") %>% na.omit()
+okologimark_2017<-st_read("data/Oekologiske_arealer_2017.shp") %>% na.omit()
+okologimark_2018<-st_read("data/Oekologiske_arealer_2018.shp") %>% na.omit()
+okologimark_2019<-st_read("data/Oekologiske_arealer_2019.shp") %>% na.omit()
+okologimark_2020<-st_read("data/Oekologiske_arealer_2020.shp") %>% na.omit()
+
+oko_geo <- okologimark_2012$geometry
+okologimark_2012 <- as_Spatial(oko_geo)
+oko_geo <- okologimark_2013$geometry
+okologimark_2013 <- as_Spatial(oko_geo)
+oko_geo <- okologimark_2014$geometry
+okologimark_2014 <- as_Spatial(oko_geo)
+oko_geo <- okologimark_2015$geometry
+okologimark_2015 <- as_Spatial(oko_geo)
+oko_geo <- okologimark_2016$geometry
+okologimark_2016 <- as_Spatial(oko_geo)
+oko_geo <- okologimark_2017$geometry
+okologimark_2017 <- as_Spatial(oko_geo)
+oko_geo <- okologimark_2018$geometry
+okologimark_2018 <- as_Spatial(oko_geo)
+oko_geo <- okologimark_2019$geometry
+okologimark_2019 <- as_Spatial(oko_geo)
+oko_geo <- okologimark_2020$geometry
+okologimark_2020 <- as_Spatial(oko_geo)
+
+
+okologimark<-raster::bind(okologimark_2019,okologimark_2020, okologimark_2018, okologimark_2017, okologimark_2016, okologimark_2015, okologimark_2014, okologimark_2013, okologimark_2012)
 
 
 head(markblok)
@@ -58,61 +89,22 @@ head(nitrate)
 ```
 ### Plotting fields
 ```{r}
-plot(st_geometry(okologimark))
+plot(okologimark)
 plot(st_geometry(markblok))
 ```
-
-### Emils code trying to fix okologimarker! 
-```{r}
-# Looking at original data -> It appears more than 1000 fields are registered (which is > our dataset)
-https://miljoegis.mim.dk/spatialmap?profile=lbst
-
-# Too few fields are apparent here in R (regardless of plotting method )
-plot(st_geometry(okologimark))
-tm_shape(okologimark) + tm_polygons()
-
-# Enough rows do not seem to be included
-nrow(markblok)
-nrow(okologimark)
-length(st_geometry(okologimark))
-
-# Subsetting df to only include "Omlægningsdato efter 31/5-2019", as shown on website
-str(okologimark$Omlaegning)
-new_okologimark = okologimark %>%
- filter(Omlaegning >= as.Date("2019-05-31"))
-
-# Plotting only the new omlaegning
-plot(st_geometry(new_okologimark))
-tm_shape(new_okologimark) + tm_polygons()
-
-# Inspecting the individual rows of "geometry"
-print(okologimark$geometry[1,])[1][1][1]
-
-# Method for merging different okologimarker in case we need it
-okologimark18 <-st_read("data/Oekologiske_arealer_2018.shp") %>% na.omit()
-okologimark19 <-st_read("data/Oekologiske_arealer_2019.shp") %>% na.omit()
-
-okologimark18 = st_union(okologimark18)
-okologimark19 = st_union(okologimark19)
-okologimark1819 = st_union(okologimark18, okologimark19)
-plot(st_geometry(okologimark1819))
-
-
-```
-
-
 
 ### Setting CRS
 ```{r}
 # Set the projection of the nitrate data as EPSG 25832
 nitrate <- st_set_crs(nitrate, value = 25832)
-okologimark <- st_set_crs(okologimark, value = 25832)
+#okologimark <- CRS("+proj=utm +zone=32 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs")
+#okologimark <- st_set_crs(okologimark, value = 25832)
 markblok <- st_set_crs(markblok, value = 25832)
 
 # Transform the geometry of the data to the assigned CRS. 
 nitrate <- st_transform(nitrate, crs=25832)
 markblok <- st_transform(markblok, crs=25832)
-okologimark <- st_transform(okologimark, crs = 25832)
+#okologimark <- st_transform(okologimark, crs = 25832)
 
 # Verify the projection is 'projected' not 'geographic'
 head(nitrate) 
@@ -140,7 +132,7 @@ plot(st_geometry(nitrate), pch = 16, cex = 0.4)
 ### Plotting points on top of organic fields (to assess CRS allignment)
 ```{r}
 plot(st_geometry(nitrate), pch = 16, cex = 0.4, col = "red")
-plot(st_geometry(okologimark), add = TRUE)
+plot(okologimark, add = TRUE)
 ```
 
 ### Plotting points on top of all fields (to assess CRS allignment)
@@ -270,6 +262,7 @@ tm_shape(nitrate_grid[1])  +
   tm_credits(text = "Johan Horsmans & Emil Jessen") +
   tm_layout(main.title = "Nitrate pollution map")
 
+
 #Points overlayed on raster:
 tm_shape(nitrate_grid[1])  +
   tm_raster(title = "Nitrate mg/l", 
@@ -281,4 +274,130 @@ tm_shape(nitrate) +
 
 ```
 
+### Load DK map
+```{r}
+DK<-st_read("denmark/denmark_administrative_outline_boundary.shp")
+```
+
+### Inspect CRS
+```{r}
+head(DK)
+```
+
+### Set CRS
+```{r}
+# Set the projection of the nitrate data as EPSG 25832
+DK <- st_set_crs(DK, value = 4326)
+
+# Transform the geometry of the data to the assigned CRS. 
+DK <- st_transform(DK, crs=25832)
+```
+
+### Inspect CRS
+```{r}
+head(DK)
+```
+
+```{r}
+#Plotting raster:
+tm_shape(nitrate_grid[1])  +
+  tm_raster(title = "Nitrate mg/l", 
+            style = "cont",
+            palette = "-RdYlGn") +
+  tm_credits(text = "Johan Horsmans & Emil Jessen") +
+  tm_layout(main.title = "Nitrate pollution map") +
+#Points overlayed on raster:
+tm_raster(title = "Nitrate mg/l", 
+            style = "cont",
+            palette = "-RdYlGn") +
+tm_shape(nitrate) +
+  tm_dots() +
+#Adding DK-map
+tm_shape(DK) + 
+  tm_polygons(alpha = 0.3)
+
+```
+
+```{r}
+#Plotting raster:
+tm_shape(nitrate_grid[1])  +
+  tm_raster(title = "Nitrate mg/l", 
+            style = "cont",
+            palette = "-RdYlGn") +
+  tm_credits(text = "Johan Horsmans & Emil Jessen") +
+  tm_layout(main.title = "Nitrate pollution map") +
+#Points overlayed on raster:
+tm_raster(title = "Nitrate mg/l", 
+            style = "cont",
+            palette = "-RdYlGn") +
+tm_shape(nitrate) +
+  tm_dots() +
+#Adding DK-map
+tm_shape(okologimark) + 
+  tm_polygons(col = "lightblue")
+```
+
+### ECO
+```{r}
+r <- raster(nitrate_grid)
+#oko_geo <- okologimark$geometry
+#okologimark2 <- as_Spatial(oko_geo)
+```
+
+```{r}
+# TEST
+r2 <- raster(ncol=36, nrow=18, vals=1.0:(18*36))
+
+cds1 <- rbind(c(-180,-20), c(-160,5), c(-60, 0), c(-160,-60), c(-180,-20))
+cds2 <- rbind(c(80,0), c(100,60), c(120,0), c(120,-55), c(80,0))
+polys <- spPolygons(cds1, cds2)
+
+agri_s2=raster::extract(x=r, y=polys, fun=mean, df=TRUE)
+
+r2[648]
+```
+
+
+```{r}
+library(raster) # use the raster library
+eco_extraction=suppressWarnings(raster::extract(x=r, y=okologimark, fun=mean, df=TRUE, na.rm=TRUE))
+
+eco_extraction$land_type<-"ecological"
+
+```
+
+
+### Markblok
+```{r}
+
+r <- raster(nitrate_grid)
+mb_geo <- sample(markblok$geometry, length(okologimark))
+markblok2 <- as_Spatial(mb_geo)
+```
+
+```{r}
+mb_extraction=suppressWarnings(raster::extract(x=r, y=markblok2, fun=mean, df=TRUE, na.rm=TRUE))
+mb_extraction$land_type<-"conventional"
+
+```
+
+```{r}
+t.test(eco_extraction$var1.pred, mb_extraction$var1.pred)
+```
+
+```{r}
+p_load(lmtest)
+```
+
+```{r}
+merged<-rbind(eco_extraction, mb_extraction)
+```
+
+
+```{r}
+bi_model <- lm(var1.pred ~ land_type, data = merged)
+
+coeftest(bi_model, type = "HC1")
+
+```
 
