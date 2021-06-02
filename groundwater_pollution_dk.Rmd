@@ -19,12 +19,19 @@ nitrate <- as.data.frame(read_csv("data/nitrate.csv")) #Load the .csv-file as a 
 #Rename columns to remove spaces:
 names(nitrate)[names(nitrate) == "Seneste"] <- "Seneste_måling" 
 names(nitrate)[names(nitrate) == "Seneste mg/l"] <- "Seneste_mgl"
+names(nitrate)[names(nitrate) == "Indtag topdybde"] <- "Indtag_topdybde" 
+
+
 ```
 
 ### Remove outliers
 ```{r}
 nitrate <- nitrate %>%
   filter_at(vars("Seneste_mgl"), any_vars(. < 200))
+
+nitrate <- nitrate %>%
+  filter_at(vars("Indtag_topdybde"), any_vars(. > 0))
+
 ```
 
 
@@ -97,8 +104,13 @@ plot(st_geometry(markblok))
 ```{r}
 # Set the projection of the nitrate data as EPSG 25832
 nitrate <- st_set_crs(nitrate, value = 25832)
-#okologimark <- CRS("+proj=utm +zone=32 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs")
-#okologimark <- st_set_crs(okologimark, value = 25832)
+
+#Set of okologi:
+#CRS("+init=epsg:25832")
+proj4string(okologimark) <- CRS("+init=epsg:25832")
+okologimark <- spTransform(okologimark, CRS("+init=epsg:25832"))
+
+# SET MARKBLOK
 markblok <- st_set_crs(markblok, value = 25832)
 
 # Transform the geometry of the data to the assigned CRS. 
@@ -115,7 +127,7 @@ head(okologimark)
 ### Filtering dates between 2018 and 2021:
 ```{r}
 nitrate <- nitrate %>%
- select(Seneste_måling, Seneste_mgl, geometry, `Indtag topdybde`) %>%
+ select(Seneste_måling, Seneste_mgl, geometry, Indtag_topdybde) %>%
  filter(Seneste_måling >= as.Date("2018-01-01") & Seneste_måling <= as.Date("2021-03-10"))
 ```
 
@@ -146,8 +158,8 @@ plot(st_geometry(nitrate), add = TRUE, pch = 16, cex = 0.4, col = "red")
 
 Depth:
 ```{r}
-summary(nitrate$`Indtag topdybde`)
-sd(nitrate$`Indtag topdybde`)
+summary(nitrate$Indtag_topdybde)
+sd(nitrate$Indtag_topdybde)
 ```
 
 ### Nitrate:
@@ -208,30 +220,16 @@ print(v_model)
 
 ### Create prediction grid (ALL COMMENTING IS ADELA)
 ```{r}
-# Create geo_bounds bounding box for kaz_geo 
-geo_bounds <- st_make_grid(nitrate$geometry, n=1)
-# Plot the bounding box polygon and points
-plot(nitrate$geometry); plot(geo_bounds, add= TRUE) 
-# Find the left bottom corner of the bounding box
 st_bbox(nitrate)
 # Define a 0.5km square grid over the polygon extent. The first parameter is the bottom left corner.
 
-grid <- GridTopology(c(446734,6054448), c(2000, 2000), c(222, 173))
+grid <- GridTopology(c(430734,6040448), c(2000, 2000), c(236, 190))
 # Create points with the same coordinate system as the boundary box
 crs(nitrate)
 gridpoints <- SpatialPoints(grid, proj4string = CRS(projection("+proj=utm +zone=32 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs "))) # CHECK CRS
 
-#UNIQUE
-#the_crs <- crs(nitrate, asText = TRUE)
-#gridpoints <- st_set_crs(gridpoints, the_crs) # Project the "zion"-dataset into the srtm-crs and save it as "zion2".
-#### UNIQUE END
-
-plot(gridpoints); plot(geo_bounds, col = "red", add = TRUE)
-# Crop out the points outside the boundary
-cropped_gridpoints <- crop(gridpoints, as(geo_bounds, "Spatial"))
-plot(cropped_gridpoints);  plot(geo_bounds, col = "red", add = TRUE)
 # Convert to SpatialPixels
-spgrid <- SpatialPixels(cropped_gridpoints)
+spgrid <- SpatialPixels(gridpoints)
 coordnames(spgrid) <- c("X", "Y")
 plot(spgrid)
 ```
@@ -276,7 +274,7 @@ tm_shape(nitrate) +
 
 ### Load DK map
 ```{r}
-DK<-st_read("denmark/denmark_administrative_outline_boundary.shp")
+DK<-st_read("data/denmark_administrative_outline_boundary.shp")
 ```
 
 ### Inspect CRS
@@ -336,6 +334,36 @@ tm_shape(nitrate) +
 tm_shape(okologimark) + 
   tm_polygons(col = "lightblue")
 ```
+### Cropped map
+```{r}
+r <- raster(nitrate_grid)
+
+
+nitrate_grid_cropped <- crop(r, extent(DK_geo2))
+nitrate_grid_cropped <- raster::mask(r, DK_geo2)
+
+```
+
+```{r}
+#Plotting raster:
+tm_shape(nitrate_grid_cropped)  +
+  tm_raster(title = "Nitrate mg/l", 
+            style = "cont",
+            palette = "-RdYlGn") +
+  tm_credits(text = "Johan Horsmans & Emil Jessen") +
+  tm_layout(main.title = "Nitrate pollution map",
+            legend.position = c("right","top"),
+            legend.bg.color = "white", legend.bg.alpha = .2, 
+            legend.frame = "gray50",
+            bg.color = "lightblue") +
+#Points overlayed on raster:
+tm_shape(nitrate) +
+  tm_dots() +
+#Adding DK-map
+tm_shape(DK) + 
+  tm_polygons(alpha = 0.3)
+```
+
 
 ### ECO
 ```{r}
@@ -398,6 +426,40 @@ merged<-rbind(eco_extraction, mb_extraction)
 bi_model <- lm(var1.pred ~ land_type, data = merged)
 
 coeftest(bi_model, type = "HC1")
+
+```
+
+### DEPTH PENALTY:
+```{r}
+nitrate <- as.data.frame(read_csv("data/nitrate.csv")) #Load the .csv-file as a dataframe and save it as "nitrate".
+
+#Rename columns to remove spaces:
+names(nitrate)[names(nitrate) == "Seneste mg/l"] <- "Seneste_mgl"
+names(nitrate)[names(nitrate) == "Indtag topdybde"] <- "Indtag_topdybde" 
+
+nitrate <- nitrate %>%
+  filter_at(vars("Seneste_mgl"), any_vars(. < 200))
+
+nitrate <- nitrate %>%
+  filter_at(vars("Indtag_topdybde"), any_vars(. > 0))
+
+p<-ggplot(nitrate, aes(Indtag_topdybde, Seneste_mgl)) +
+  geom_point()
+
+  
+# loess method: local regression fitting
+p + geom_smooth(method = "loess")
+
+###
+
+
+ggplot(cars, aes(speed, dist)) +
+  geom_point()
+# Add regression line
+p + geom_smooth(method = lm)
+  
+# loess method: local regression fitting
+p + geom_smooth(method = "loess")
 
 ```
 
