@@ -20,8 +20,6 @@ nitrate <- as.data.frame(read_csv("data/nitrate.csv")) #Load the .csv-file as a 
 names(nitrate)[names(nitrate) == "Seneste"] <- "Seneste_måling" 
 names(nitrate)[names(nitrate) == "Seneste mg/l"] <- "Seneste_mgl"
 names(nitrate)[names(nitrate) == "Indtag topdybde"] <- "Indtag_topdybde" 
-
-
 ```
 
 ### Remove outliers
@@ -31,7 +29,6 @@ nitrate <- nitrate %>%
 
 nitrate <- nitrate %>%
   filter_at(vars("Indtag_topdybde"), any_vars(. > 0))
-
 ```
 
 
@@ -67,6 +64,40 @@ okologimark_2018<-st_read("data/Oekologiske_arealer_2018.shp") %>% na.omit()
 okologimark_2019<-st_read("data/Oekologiske_arealer_2019.shp") %>% na.omit()
 okologimark_2020<-st_read("data/Oekologiske_arealer_2020.shp") %>% na.omit()
 
+####
+okologimark <- c(okologimark_2012$geometry,okologimark_2013$geometry, okologimark_2014$geometry, okologimark_2015$geometry, okologimark_2016$geometry, okologimark_2017$geometry, okologimark_2018$geometry, okologimark_2019$geometry, okologimark_2020$geometry) %>% as_Spatial()
+
+#okologimark <- as_Spatial(okologimark)
+
+markblok <- as_Spatial(markblok$geometry)
+
+markblok <- markblok[lengths(st_intersects(st_as_sf(markblok),st_as_sf(okologimark)))==0,]
+
+####
+
+
+
+##### TEST 1
+
+okologimark_merged_geo <- c(okologimark_2012$geometry,okologimark_2013$geometry, okologimark_2014$geometry, okologimark_2015$geometry, okologimark_2016$geometry, okologimark_2017$geometry, okologimark_2018$geometry, okologimark_2019$geometry, okologimark_2020$geometry)
+
+okologimark <- as_Spatial(okologimark_merged_geo)
+
+okologimark_merged_geo <- as.data.frame(okologimark_merged_geo)
+
+markblok<-markblok$geometry
+
+markblok<-as.data.frame(markblok)
+
+markblok<-rbind(markblok,okologimark_merged_geo)
+
+markblok<-markblok[!duplicated(markblok$geometry), ]
+
+
+#####
+
+
+
 oko_geo <- okologimark_2012$geometry
 okologimark_2012 <- as_Spatial(oko_geo)
 oko_geo <- okologimark_2013$geometry
@@ -97,8 +128,12 @@ head(nitrate)
 ### Plotting fields
 ```{r}
 plot(okologimark)
-plot(st_geometry(markblok))
 ```
+
+```{r}
+plot(Adash)
+```
+
 
 ### Setting CRS
 ```{r}
@@ -147,10 +182,16 @@ plot(st_geometry(nitrate), pch = 16, cex = 0.4, col = "red")
 plot(okologimark, add = TRUE)
 ```
 
-### Plotting points on top of all fields (to assess CRS allignment)
+### Plotting points on top of all conventional fields (to assess CRS allignment)
 ```{r}
 plot(st_geometry(markblok))
 plot(st_geometry(nitrate), add = TRUE, pch = 16, cex = 0.4, col = "red")
+```
+
+### REMOVE DUPLICATES
+```{r}
+
+
 ```
 
 
@@ -175,6 +216,122 @@ hist(nitrate$Seneste_mgl)
 ggplot(nitrate) +
   geom_sf(aes(col = Seneste_mgl))
 ```
+
+```{r}
+# TEST
+point <- matrix(c(480258.4, 6178223,
+ 3.2, 1.75,
+ 2,3,
+ 1.5, 1.25, 
+ 2.75, 2.5), ncol = 2, byrow = TRUE)
+points <- SpatialPoints(point)
+
+p1 <- matrix(c(1,1,
+ 2,1,
+ 4,2,
+ 3,2), ncol = 2, byrow = TRUE)
+p2 <- matrix(c(2.2,1,
+ 3,1,
+ 3,2,
+ 3,3,
+ 2.8,3), ncol = 2, byrow = TRUE)
+p1s <- Polygons(list(Polygon(p1)), 3)
+p2s <- Polygons(list(Polygon(p2)), 4)
+sps <- SpatialPolygons(list(p1s, p2s))
+
+sps2 <- lapply(sps@polygons, function(x) SpatialPolygons(list(x)))
+
+lapply(sps2, function(x) over(points, x))
+
+```
+
+
+```{r}
+oko_test <- lapply(Adash@polygons[0:10000], function(x) SpatialPolygons(list(x)))
+#oko_test2<-oko_test[0:1000]
+```
+
+
+```{r}
+p_load(DescTools)
+
+point <- matrix(ncol = 2)
+
+for (i in c(1:length(nitrate$geometry))){
+  p <- matrix(c(nitrate$X[i], nitrate$Y[i]), ncol = 2, byrow = TRUE)
+  point <- rbind(p, point)
+}
+
+point <- point %>% na.omit()
+
+points <- SpatialPoints(point)
+
+
+point[1,1] <- 480258.4
+
+point[1,2] <- 6178223
+
+shit<-lapply(oko_test, function(x) over(points, x))
+
+shit[74]
+
+which(sapply(shit, function(y) 1 %in% y))
+
+
+flat_list <- as.data.frame(do.call(rbind, lapply(shit, as.data.frame)))
+
+
+###
+foo = function(x, sep = ".") {
+    names(x) = paste0(seq_along(x))
+    while(any(sapply(x, class) == "list")) {
+        ind = sapply(x, class) == "list"
+        temp = unlist(x[ind], recursive = FALSE)
+        names(temp) = paste0(rep(names(x)[ind], lengths(x[ind])),
+                             sep,
+                             sequence(lengths(x[ind])))
+        x = c(x[!ind], temp)
+    }
+    return(x)
+}
+f2 = foo(shit)
+indexes<-names(which(unlist(f2) == 1))
+
+indexes <- gsub("^[^.]+.", "", indexes)
+
+indexes<-as.numeric(indexes)
+
+
+nitrate$land_type <- "shit"
+
+nitrate <- nitrate %>% na.omit()
+
+i <- 1
+
+indexes[1]
+
+nitrate$land_type[noquote(indexes[1])]
+
+for (i in indexes) {
+  nitrate$land_type[i] <- "conventional"
+}
+###
+
+nitrate$land_type <- as.factor(nitrate$land_type)
+
+#
+p <- ggplot(nitrate, aes(Indtag_topdybde, colour = land_type))
+
+
+p +  geom_freqpoly()
+#
+
+
+##
+
+##
+```
+
 
 ### Kriging:
 
@@ -450,16 +607,53 @@ p<-ggplot(nitrate, aes(Indtag_topdybde, Seneste_mgl)) +
 # loess method: local regression fitting
 p + geom_smooth(method = "loess")
 
-###
+
+```
+### Depthpenalty modeling
+```{r}
+library(tidyverse)
+p_load(caret)
+
+lm(nitrate$Indtag_topdybde ~ poly(nitrate$Seneste_mgl, 2, raw = TRUE), data = nitrate) %>% summary()
+
+```
+```{r}
+# Andengrads
+ggplot(nitrate, aes(Indtag_topdybde, Seneste_mgl) ) +
+  geom_point() +
+  stat_smooth(method = lm, formula = y ~ poly(x, 5, raw = TRUE))
 
 
-ggplot(cars, aes(speed, dist)) +
-  geom_point()
-# Add regression line
-p + geom_smooth(method = lm)
-  
-# loess method: local regression fitting
-p + geom_smooth(method = "loess")
+# Log
+ggplot(nitrate, aes(Indtag_topdybde, Seneste_mgl) ) +
+  geom_point() +
+  stat_smooth(method = lm, formula = y ~ log(x))
+
+
+ggplot(nitrate, aes(Indtag_topdybde, Seneste_mgl) ) +
+  geom_point() +
+  stat_smooth(method = lm, formula = log(y) ~ x)
+
+```
+
+### SPLINE MODEL http://www.sthda.com/english/articles/40-regression-analysis/162-nonlinear-regression-essentials-in-r-polynomial-and-spline-regression-models/ 
+```{r}
+p_load(mgcv)
+
+model <- gam(Seneste_mgl ~ s(Indtag_topdybde), data = nitrate)
+
+model %>% summary()
+
+ggplot(nitrate, aes(Indtag_topdybde, Seneste_mgl) ) +
+  geom_point() +
+  stat_smooth(method = gam, formula = y ~ s(x))
+
+nitrate$predictions <- model %>% predict(nitrate)
+
+nitrate$penalty <- nitrate$Seneste_mgl-(nitrate$predictions*0.02)
+
+
+199.2-(31.71734*0.02)
 
 ```
 
