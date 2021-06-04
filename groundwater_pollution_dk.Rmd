@@ -9,7 +9,7 @@ output: github_document
 ```{r}
 library(pacman)
 
-p_load(sf, raster, dplyr, tmap, ggplot2, tidyverse, lubridate, sp, gstat)
+p_load(sf, raster, dplyr, tmap, ggplot2, tidyverse, lubridate, sp, gstat, ggthemes, lmtest)
 ```
 
 ### Loading nitrate data:
@@ -52,8 +52,13 @@ nitrate <- st_as_sf(nitrate, coords = c("longitude", "latitude"))
 
 ### Loading land-use data.
 ```{r}
-markblok<-st_read("data/Markblok.shp") %>% na.omit()
+# Loading markblok
+markblok <- st_read("data/Markblok.shp") %>% na.omit() 
 
+# Convert to SpatialPolygons-object
+markblok <- as_Spatial(markblok$geometry)
+
+# Load ecological fields:
 okologimark_2012<-st_read("data/Oekologiske_arealer_2012.shp") %>% na.omit()
 okologimark_2013<-st_read("data/Oekologiske_arealer_2013.shp") %>% na.omit()
 okologimark_2014<-st_read("data/Oekologiske_arealer_2014.shp") %>% na.omit()
@@ -64,61 +69,11 @@ okologimark_2018<-st_read("data/Oekologiske_arealer_2018.shp") %>% na.omit()
 okologimark_2019<-st_read("data/Oekologiske_arealer_2019.shp") %>% na.omit()
 okologimark_2020<-st_read("data/Oekologiske_arealer_2020.shp") %>% na.omit()
 
-####
+# Merge ecological field-geometry and convert it to SpatialPolygons
 okologimark <- c(okologimark_2012$geometry,okologimark_2013$geometry, okologimark_2014$geometry, okologimark_2015$geometry, okologimark_2016$geometry, okologimark_2017$geometry, okologimark_2018$geometry, okologimark_2019$geometry, okologimark_2020$geometry) %>% as_Spatial()
 
-#okologimark <- as_Spatial(okologimark)
-
-markblok <- as_Spatial(markblok$geometry)
 
 markblok <- markblok[lengths(st_intersects(st_as_sf(markblok),st_as_sf(okologimark)))==0,]
-
-####
-
-
-
-##### TEST 1
-
-okologimark_merged_geo <- c(okologimark_2012$geometry,okologimark_2013$geometry, okologimark_2014$geometry, okologimark_2015$geometry, okologimark_2016$geometry, okologimark_2017$geometry, okologimark_2018$geometry, okologimark_2019$geometry, okologimark_2020$geometry)
-
-okologimark <- as_Spatial(okologimark_merged_geo)
-
-okologimark_merged_geo <- as.data.frame(okologimark_merged_geo)
-
-markblok<-markblok$geometry
-
-markblok<-as.data.frame(markblok)
-
-markblok<-rbind(markblok,okologimark_merged_geo)
-
-markblok<-markblok[!duplicated(markblok$geometry), ]
-
-
-#####
-
-
-
-oko_geo <- okologimark_2012$geometry
-okologimark_2012 <- as_Spatial(oko_geo)
-oko_geo <- okologimark_2013$geometry
-okologimark_2013 <- as_Spatial(oko_geo)
-oko_geo <- okologimark_2014$geometry
-okologimark_2014 <- as_Spatial(oko_geo)
-oko_geo <- okologimark_2015$geometry
-okologimark_2015 <- as_Spatial(oko_geo)
-oko_geo <- okologimark_2016$geometry
-okologimark_2016 <- as_Spatial(oko_geo)
-oko_geo <- okologimark_2017$geometry
-okologimark_2017 <- as_Spatial(oko_geo)
-oko_geo <- okologimark_2018$geometry
-okologimark_2018 <- as_Spatial(oko_geo)
-oko_geo <- okologimark_2019$geometry
-okologimark_2019 <- as_Spatial(oko_geo)
-oko_geo <- okologimark_2020$geometry
-okologimark_2020 <- as_Spatial(oko_geo)
-
-
-okologimark<-raster::bind(okologimark_2019,okologimark_2020, okologimark_2018, okologimark_2017, okologimark_2016, okologimark_2015, okologimark_2014, okologimark_2013, okologimark_2012)
 
 
 head(markblok)
@@ -131,7 +86,12 @@ plot(okologimark)
 ```
 
 ```{r}
-plot(Adash)
+plot(markblok)
+```
+
+### Taking subset of conventional fields:
+```{r}
+markblok_subset <- sample(markblok, length(okologimark))
 ```
 
 
@@ -145,16 +105,15 @@ nitrate <- st_set_crs(nitrate, value = 25832)
 proj4string(okologimark) <- CRS("+init=epsg:25832")
 okologimark <- spTransform(okologimark, CRS("+init=epsg:25832"))
 
-# SET MARKBLOK
-markblok <- st_set_crs(markblok, value = 25832)
+proj4string(markblok) <- CRS("+init=epsg:25832")
+markblok <- spTransform(markblok, CRS("+init=epsg:25832"))
+
 
 # Transform the geometry of the data to the assigned CRS. 
 nitrate <- st_transform(nitrate, crs=25832)
-markblok <- st_transform(markblok, crs=25832)
-#okologimark <- st_transform(okologimark, crs = 25832)
 
 # Verify the projection is 'projected' not 'geographic'
-head(nitrate) 
+head(nitrate)
 head(markblok)
 head(okologimark)
 ```
@@ -163,7 +122,7 @@ head(okologimark)
 ```{r}
 nitrate <- nitrate %>%
  select(Seneste_måling, Seneste_mgl, geometry, Indtag_topdybde) %>%
- filter(Seneste_måling >= as.Date("2018-01-01") & Seneste_måling <= as.Date("2021-03-10"))
+ filter(Seneste_måling >= as.Date("2012-01-01") & Seneste_måling <= as.Date("2021-03-10"))
 ```
 
 ### Remove duplicate entries (for the purpose of kriging)
@@ -182,16 +141,11 @@ plot(st_geometry(nitrate), pch = 16, cex = 0.4, col = "red")
 plot(okologimark, add = TRUE)
 ```
 
+
 ### Plotting points on top of all conventional fields (to assess CRS allignment)
 ```{r}
-plot(st_geometry(markblok))
+plot(markblok_subset)
 plot(st_geometry(nitrate), add = TRUE, pch = 16, cex = 0.4, col = "red")
-```
-
-### REMOVE DUPLICATES
-```{r}
-
-
 ```
 
 
@@ -200,8 +154,12 @@ plot(st_geometry(nitrate), add = TRUE, pch = 16, cex = 0.4, col = "red")
 Depth:
 ```{r}
 summary(nitrate$Indtag_topdybde)
+```
+
+```{r}
 sd(nitrate$Indtag_topdybde)
 ```
+
 
 ### Nitrate:
 ```{r}
@@ -214,48 +172,24 @@ hist(nitrate$Seneste_mgl)
 ### Plotting points with nitrate per. mg/l metric:
 ```{r}
 ggplot(nitrate) +
-  geom_sf(aes(col = Seneste_mgl))
+  geom_sf(aes(colour = Seneste_mgl)) + theme_solarized() +  scale_colour_gradientn(colors = c("darkgreen", "yellow", "red"))
 ```
 
+
+# Data wrangling (converting to list)
 ```{r}
-# TEST
-point <- matrix(c(480258.4, 6178223,
- 3.2, 1.75,
- 2,3,
- 1.5, 1.25, 
- 2.75, 2.5), ncol = 2, byrow = TRUE)
-points <- SpatialPoints(point)
-
-p1 <- matrix(c(1,1,
- 2,1,
- 4,2,
- 3,2), ncol = 2, byrow = TRUE)
-p2 <- matrix(c(2.2,1,
- 3,1,
- 3,2,
- 3,3,
- 2.8,3), ncol = 2, byrow = TRUE)
-p1s <- Polygons(list(Polygon(p1)), 3)
-p2s <- Polygons(list(Polygon(p2)), 4)
-sps <- SpatialPolygons(list(p1s, p2s))
-
-sps2 <- lapply(sps@polygons, function(x) SpatialPolygons(list(x)))
-
-lapply(sps2, function(x) over(points, x))
-
+markblok_polygon_list <- lapply(markblok_subset@polygons, function(x) SpatialPolygons(list(x)))
 ```
 
 
 ```{r}
-oko_test <- lapply(Adash@polygons[0:10000], function(x) SpatialPolygons(list(x)))
-#oko_test2<-oko_test[0:1000]
+nitrate$X <- st_coordinates(nitrate)[,1]
+nitrate$Y <- st_coordinates(nitrate)[,2]
 ```
 
-
 ```{r}
-p_load(DescTools)
-
 point <- matrix(ncol = 2)
+
 
 for (i in c(1:length(nitrate$geometry))){
   p <- matrix(c(nitrate$X[i], nitrate$Y[i]), ncol = 2, byrow = TRUE)
@@ -266,19 +200,11 @@ point <- point %>% na.omit()
 
 points <- SpatialPoints(point)
 
+markblok_overlap<-lapply(markblok_polygon_list, function(x) over(points, x))
 
-point[1,1] <- 480258.4
+which(sapply(markblok_overlap, function(y) 1 %in% y))
 
-point[1,2] <- 6178223
-
-shit<-lapply(oko_test, function(x) over(points, x))
-
-shit[74]
-
-which(sapply(shit, function(y) 1 %in% y))
-
-
-flat_list <- as.data.frame(do.call(rbind, lapply(shit, as.data.frame)))
+#flat_list <- as.data.frame(do.call(rbind, lapply(markblok_overlap, as.data.frame)))
 
 
 ###
@@ -294,42 +220,100 @@ foo = function(x, sep = ".") {
     }
     return(x)
 }
-f2 = foo(shit)
+f2 = foo(markblok_overlap)
 indexes<-names(which(unlist(f2) == 1))
 
 indexes <- gsub("^[^.]+.", "", indexes)
 
 indexes<-as.numeric(indexes)
 
+#nitrate$land_type <- "shit"
+#nitrate <- nitrate %>% na.omit()
 
-nitrate$land_type <- "shit"
+nitrate_depth<-nitrate
+nitrate_depth$land_type <- NA
 
-nitrate <- nitrate %>% na.omit()
-
-i <- 1
-
-indexes[1]
-
-nitrate$land_type[noquote(indexes[1])]
 
 for (i in indexes) {
-  nitrate$land_type[i] <- "conventional"
+  nitrate_depth$land_type[i] <- "conventional"
 }
 ###
+```
 
-nitrate$land_type <- as.factor(nitrate$land_type)
+#Same for ECO:
+```{r}
+eco_polygon_list <- lapply(okologimark@polygons, function(x) SpatialPolygons(list(x)))
+
+```
+
+```{r}
+point <- matrix(ncol = 2)
+
+
+for (i in c(1:length(nitrate$geometry))){
+  p <- matrix(c(nitrate$X[i], nitrate$Y[i]), ncol = 2, byrow = TRUE)
+  point <- rbind(p, point)
+}
+
+point <- point %>% na.omit()
+
+points <- SpatialPoints(point)
+
+eco_overlap<-lapply(eco_polygon_list, function(x) over(points, x))
+
+which(sapply(eco_overlap, function(y) 1 %in% y))
+
+f2 = foo(eco_overlap)
+indexes<-names(which(unlist(f2) == 1))
+
+indexes <- gsub("^[^.]+.", "", indexes)
+
+indexes<-as.numeric(indexes)
+
+#nitrate$land_type <- "shit"
+#nitrate <- nitrate %>% na.omit()
+
+#nitrate_depth<-nitrate
+#nitrate_depth$land_type <- NA
+
+
+for (i in indexes) {
+  nitrate_depth$land_type[i] <- "eco"
+}
+
+nitrate_depth <- nitrate_depth %>% na.omit()
+
+```
+
+
+
+```{r}
+nitrate_depth$land_type <- as.factor(nitrate_depth$land_type)
 
 #
-p <- ggplot(nitrate, aes(Indtag_topdybde, colour = land_type))
+p <- ggplot(nitrate_depth, aes(Indtag_topdybde, colour = land_type))
 
 
-p +  geom_freqpoly()
-#
+p + geom_density()
 
 
 ##
 
-##
+p_geom <- ggplot(nitrate, aes(Indtag_topdybde))
+
+
+p_geom + geom_density()
+
+
+####
+nitrate$land_type <- "all"
+
+p_geom <- ggplot() +
+  geom_density(nitrate, mapping = aes(Indtag_topdybde, colour = land_type)) +
+  geom_density(nitrate_depth, mapping = aes(Indtag_topdybde, colour = land_type)) + theme_solarized()+ scale_colour_solarized()
+
+p_geom
+
 ```
 
 
@@ -357,8 +341,8 @@ Fit a model to the variogram:
 ```{r}
 # Eyeball the variogram and estimate the initial parameters (ADELA TEXT)
 nugget <- 550
-psill <- -360
-range <- 45000
+psill <- 70
+range <- 55000
 # Fit the variogram (ADELA TEXT)
 v_model <- fit.variogram(
   vgm, 
@@ -496,8 +480,8 @@ tm_shape(okologimark) +
 r <- raster(nitrate_grid)
 
 
-nitrate_grid_cropped <- crop(r, extent(DK_geo2))
-nitrate_grid_cropped <- raster::mask(r, DK_geo2)
+nitrate_grid_cropped <- crop(r, extent(DK))
+nitrate_grid_cropped <- raster::mask(r, DK)
 
 ```
 
@@ -530,21 +514,6 @@ r <- raster(nitrate_grid)
 ```
 
 ```{r}
-# TEST
-r2 <- raster(ncol=36, nrow=18, vals=1.0:(18*36))
-
-cds1 <- rbind(c(-180,-20), c(-160,5), c(-60, 0), c(-160,-60), c(-180,-20))
-cds2 <- rbind(c(80,0), c(100,60), c(120,0), c(120,-55), c(80,0))
-polys <- spPolygons(cds1, cds2)
-
-agri_s2=raster::extract(x=r, y=polys, fun=mean, df=TRUE)
-
-r2[648]
-```
-
-
-```{r}
-library(raster) # use the raster library
 eco_extraction=suppressWarnings(raster::extract(x=r, y=okologimark, fun=mean, df=TRUE, na.rm=TRUE))
 
 eco_extraction$land_type<-"ecological"
@@ -556,12 +525,12 @@ eco_extraction$land_type<-"ecological"
 ```{r}
 
 r <- raster(nitrate_grid)
-mb_geo <- sample(markblok$geometry, length(okologimark))
-markblok2 <- as_Spatial(mb_geo)
+#mb_geo <- sample(markblok$geometry, length(okologimark))
+#markblok2 <- as_Spatial(mb_geo)
 ```
 
 ```{r}
-mb_extraction=suppressWarnings(raster::extract(x=r, y=markblok2, fun=mean, df=TRUE, na.rm=TRUE))
+mb_extraction=suppressWarnings(raster::extract(x=r, y=markblok, fun=mean, df=TRUE, na.rm=TRUE))
 mb_extraction$land_type<-"conventional"
 
 ```
@@ -611,8 +580,6 @@ p + geom_smooth(method = "loess")
 ```
 ### Depthpenalty modeling
 ```{r}
-library(tidyverse)
-p_load(caret)
 
 lm(nitrate$Indtag_topdybde ~ poly(nitrate$Seneste_mgl, 2, raw = TRUE), data = nitrate) %>% summary()
 
