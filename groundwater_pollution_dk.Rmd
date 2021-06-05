@@ -23,7 +23,7 @@ names(nitrate)[names(nitrate) == "Seneste mg/l"] <- "Seneste_mgl"
 names(nitrate)[names(nitrate) == "Indtag topdybde"] <- "Indtag_topdybde" 
 ```
 
-### Remove outliers:
+### Remove outliers (see written report for more info):
 ```{r}
 # Remove all nitrate-measures above 200:
 nitrate <- nitrate %>%
@@ -93,6 +93,8 @@ conventional_fields <- all_fields[lengths(st_intersects(st_as_sf(all_fields),st_
 # Assess how many organic fields have been filtered out:
 length(all_fields) - length(conventional_fields)
 ```
+9756 organic fields have been filtered out.
+
 ### Inspecting "conventional_fields" and "organic_fields":
 ```{r}
 # Inspect "conventional_fields" and "organic_fields":
@@ -110,7 +112,7 @@ plot(organic_fields, main = "Organic fields:")
 ```
 
 ```{r}
-# Plot conventional fields
+# Plot conventional fields:
 plot(conventional_fields, main = "Conventional fields:")
 ```
 
@@ -159,13 +161,13 @@ nitrate<-nitrate[!duplicated(nitrate$geometry), ]
 plot(st_geometry(nitrate), pch = 16, cex = 0.4, main = "Nitrate measurements:")
 ```
 
-### Plotting points on top of organic fields (to assess CRS allignment):
+### Plotting nitrate measurement-points on top of organic fields (to assess CRS allignment):
 ```{r}
 plot(st_geometry(nitrate), pch = 16, cex = 0.4, col = "red", main = "Nitrate measurements (red) and organic fields (black):")
 plot(organic_fields, add = TRUE)
 ```
 
-### Plotting points on top of all conventional fields (to assess CRS allignment)
+### Plotting points on top of all conventional fields (to assess CRS allignment):
 ```{r}
 plot(st_geometry(nitrate), pch = 16, cex = 0.4, col = "red", main = "Nitrate measurements (red) and conventional fields (black):")
 plot(conventional_fields, add = TRUE)
@@ -174,7 +176,7 @@ plot(conventional_fields, add = TRUE)
 ### Plotting points with nitrate per. mg/l metric:
 ```{r}
 ggplot(nitrate, aes(colour = Seneste_mgl)) +
-  geom_sf() + coord_sf(datum = st_crs(25832)) + theme_solarized() + labs(title = "Nitrate measurements:", color = "Nitrate (mg/L)") + scale_colour_gradientn(colors = c("darkgreen", "yellow", "red"))
+  geom_sf() + coord_sf(datum = st_crs(25832)) + theme_solarized() + labs(title = "Nitrate measurements:", color = "Nitrate (mg/L)") + scale_colour_gradientn(colors = c("darkgreen", "yellow", "red")) + xlab("Metres") + ylab("Metres")
 ```
 
 # Exploratory statistics:
