@@ -19,30 +19,6 @@ p_load(sf, raster, dplyr, tmap, ggplot2, tidyverse, lubridate, sp, gstat, ggthem
 nitrate <- as.data.frame(read_csv("data/nitrate.csv")) 
 ```
 
-    ## 
-    ## ── Column specification ────────────────────────────────────────────────────────
-    ## cols(
-    ##   WKT = col_character(),
-    ##   `Vis data` = col_character(),
-    ##   DGUnr. = col_character(),
-    ##   Borerapport = col_character(),
-    ##   Indtag = col_double(),
-    ##   Analyser = col_double(),
-    ##   `Median mg/l` = col_double(),
-    ##   `Min. mg/l` = col_double(),
-    ##   `Maks. mg/l` = col_double(),
-    ##   `Indtag topdybde` = col_double(),
-    ##   `Topdybde forklaret` = col_character(),
-    ##   Seneste = col_date(format = ""),
-    ##   `Seneste mg/l` = col_double(),
-    ##   objectid = col_double(),
-    ##   symbol_ident = col_character(),
-    ##   symbol_size = col_double(),
-    ##   symbol_txt_size = col_double(),
-    ##   txt_search = col_character(),
-    ##   rgb = col_character()
-    ## )
-
 ``` r
 # Rename columns to remove spaces and odd characters:
 names(nitrate)[names(nitrate) == "Seneste"] <- "Seneste_måling" 
