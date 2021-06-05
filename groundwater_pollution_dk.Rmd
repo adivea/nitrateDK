@@ -1,7 +1,7 @@
 ---
 title: "groundwater_pollution_dk"
 author: "Johan Horsmans"
-date: "4/26/2021"
+date: "05/06/2021"
 output: github_document
 ---
 # Loading- and preprocessing data:
@@ -241,8 +241,8 @@ indexes <- gsub("^[^.]+.", "", indexes)
 # Transform to numeric variable:
 indexes <- as.numeric(indexes)
 
-# Create a new column called "land_type" and fill it with "Out of bounds":
-nitrate$land_type <- "Out of bounds"
+# Create a new column called "land_type" and fill it with "out of bounds":
+nitrate$land_type <- "out of bounds"
 
 # Change the value for "land_type" to "conventional" for all the nitrate measurements overlapping with conventional field polygons:
 for (i in indexes) {
@@ -355,7 +355,6 @@ crs(nitrate_sp) <- crs(spgrid)
 # Do kriging interpolations over the grid
 nitrate_grid <- krige(nitrate_concentration ~ X + Y, nitrate_sp, newdata = spgrid, model = v_model)
 
-
 # Plot the nitrate measurements on top of the kriged "nitrate_grid":
 
 # Plotting raster:
@@ -364,9 +363,9 @@ tm_shape(nitrate_grid[1])  +
             style = "cont",
             palette = "-RdYlGn") +
   tm_credits(text = "Johan Horsmans & Emil Jessen") +
-  tm_layout(main.title = "Nitrate pollution map") +
+  tm_layout(main.title = "Nitrate concentrations in Denmark:") +
   
-# Nitrate overlayed on raster:
+# Nitrate measurements overlayed on raster:
 tm_shape(nitrate) +
   tm_dots()
 ```
@@ -411,20 +410,23 @@ tm_shape(nitrate_grid_cropped)  +
   tm_raster(title = "Nitrate mg/l", 
             style = "cont",
             palette = "-RdYlGn") +
-  tm_credits(text = "Johan Horsmans & Emil Jessen") +
-  tm_layout(main.title = "Nitrate pollution map",
-            legend.position = c("right","top"),
-            legend.bg.color = "white", legend.bg.alpha = .2, 
-            legend.frame = "gray50",
-            bg.color = "lightblue") +
-  
-# Points overlayed on raster:
-tm_shape(nitrate) +
-  tm_dots() +
   
 # Adding DK-map:
 tm_shape(DK) + 
-  tm_polygons(alpha = 0.3)
+  tm_polygons(alpha = 0.3) +
+  
+# Adding nitrate measurements overlayed on raster:
+tm_shape(nitrate) +
+  tm_dots(col = "grey27") +
+
+# Adding legend, credits and scale bar:
+  tm_credits(text = "Johan Horsmans & Emil Jessen") +
+  tm_layout(main.title = "Nitrate concentrations in Denmark:",
+            legend.position = c("right","top"),
+            legend.bg.color = "white", legend.bg.alpha = .2, 
+            legend.frame = "gray50",
+            bg.color = "lightblue") + tm_add_legend(type = "symbol",  labels = "Nitrate measurements", shape = 20, col = "grey27") + 
+  tm_scale_bar(breaks = c(20, 40, 60, 80, 100))
 ```
 
 # Statistical modeling:
