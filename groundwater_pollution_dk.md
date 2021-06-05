@@ -683,10 +683,6 @@ tm_shape(nitrate_grid[1])  +
   tm_layout(main.title = "Nitrate pollution map") +
   
 # Nitrate overlayed on raster:
-tm_shape(nitrate_grid[1])  +
-  tm_raster(title = "Nitrate mg/l", 
-            style = "cont",
-            palette = "-RdYlGn") +
 tm_shape(nitrate) +
   tm_dots()
 ```
