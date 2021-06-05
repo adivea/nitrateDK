@@ -17,9 +17,7 @@ p_load(sf, raster, dplyr, tmap, ggplot2, tidyverse, lubridate, sp, gstat, ggthem
 ``` r
 # Load the .csv-file as a dataframe and save it as "nitrate":
 nitrate <- as.data.frame(read_csv("data/nitrate.csv")) 
-```
 
-``` r
 # Rename columns to remove spaces and odd characters:
 names(nitrate)[names(nitrate) == "Seneste"] <- "Seneste_måling" 
 names(nitrate)[names(nitrate) == "Seneste mg/l"] <- "Seneste_mgl"
