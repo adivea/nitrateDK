@@ -17,33 +17,7 @@ p_load(sf, raster, dplyr, tmap, ggplot2, tidyverse, lubridate, sp, gstat, ggthem
 ``` r
 # Load the .csv-file as a dataframe and save it as "nitrate":
 nitrate <- as.data.frame(read_csv("data/nitrate.csv")) 
-```
 
-    ## 
-    ## ── Column specification ────────────────────────────────────────────────────────
-    ## cols(
-    ##   WKT = col_character(),
-    ##   `Vis data` = col_character(),
-    ##   DGUnr. = col_character(),
-    ##   Borerapport = col_character(),
-    ##   Indtag = col_double(),
-    ##   Analyser = col_double(),
-    ##   `Median mg/l` = col_double(),
-    ##   `Min. mg/l` = col_double(),
-    ##   `Maks. mg/l` = col_double(),
-    ##   `Indtag topdybde` = col_double(),
-    ##   `Topdybde forklaret` = col_character(),
-    ##   Seneste = col_date(format = ""),
-    ##   `Seneste mg/l` = col_double(),
-    ##   objectid = col_double(),
-    ##   symbol_ident = col_character(),
-    ##   symbol_size = col_double(),
-    ##   symbol_txt_size = col_double(),
-    ##   txt_search = col_character(),
-    ##   rgb = col_character()
-    ## )
-
-``` r
 # Rename columns to remove spaces and odd characters:
 names(nitrate)[names(nitrate) == "Seneste"] <- "measurement_date" 
 names(nitrate)[names(nitrate) == "Seneste mg/l"] <- "nitrate_concentration"
@@ -118,120 +92,21 @@ head(nitrate[,c(9, 11, 12)])
 ``` r
 # Loading "Markblok.shp" which contains all registered fields in Denmark:
 all_fields <- st_read("data/Markblok.shp") %>% na.omit() 
-```
 
-    ## Reading layer `Markblok' from data source `/home/cds-au618771/cds-spatial/groundwater_polution_dk/data/Markblok.shp' using driver `ESRI Shapefile'
-    ## replacing null geometries with empty geometries
-    ## Simple feature collection with 476658 features and 6 fields (with 1 geometry empty)
-    ## geometry type:  POLYGON
-    ## dimension:      XY
-    ## bbox:           xmin: 442061.7 ymin: 6049864 xmax: 892661.5 ymax: 6401571
-    ## proj4string:    +proj=utm +zone=32 +ellps=GRS80 +units=m +no_defs
-
-``` r
 # Convert "fields" to SpatialPolygons-object:
 all_fields <- as_Spatial(all_fields$geometry)
 
 # Load all registered ecological fields (from 2012 to 2020):
 organic_fields_2012 <- st_read("data/Oekologiske_arealer_2012.shp") %>% na.omit()
-```
-
-    ## Reading layer `Oekologiske_arealer_2012' from data source `/home/cds-au618771/cds-spatial/groundwater_polution_dk/data/Oekologiske_arealer_2012.shp' using driver `ESRI Shapefile'
-    ## Simple feature collection with 49904 features and 5 fields
-    ## geometry type:  POLYGON
-    ## dimension:      XY
-    ## bbox:           xmin: 445062.9 ymin: 6050575 xmax: 891630.3 ymax: 6391823
-    ## proj4string:    +proj=utm +zone=32 +ellps=GRS80 +units=m +no_defs
-
-``` r
 organic_fields_2013 <- st_read("data/Oekologiske_arealer_2013.shp") %>% na.omit()
-```
-
-    ## Reading layer `Oekologiske_arealer_2013' from data source `/home/cds-au618771/cds-spatial/groundwater_polution_dk/data/Oekologiske_arealer_2013.shp' using driver `ESRI Shapefile'
-    ## Simple feature collection with 49326 features and 5 fields
-    ## geometry type:  POLYGON
-    ## dimension:      XY
-    ## bbox:           xmin: 445063.1 ymin: 6050575 xmax: 892019.1 ymax: 6391818
-    ## proj4string:    +proj=utm +zone=32 +ellps=GRS80 +units=m +no_defs
-
-``` r
 organic_fields_2014 <- st_read("data/Oekologiske_arealer_2014.shp") %>% na.omit()
-```
-
-    ## Reading layer `Oekologiske_arealer_2014' from data source `/home/cds-au618771/cds-spatial/groundwater_polution_dk/data/Oekologiske_arealer_2014.shp' using driver `ESRI Shapefile'
-    ## Simple feature collection with 47797 features and 5 fields
-    ## geometry type:  POLYGON
-    ## dimension:      XY
-    ## bbox:           xmin: 445063.1 ymin: 6050576 xmax: 892019.6 ymax: 6391818
-    ## proj4string:    +proj=utm +zone=32 +ellps=GRS80 +units=m +no_defs
-
-``` r
 organic_fields_2015 <- st_read("data/Oekologiske_arealer_2015.shp") %>% na.omit()
-```
-
-    ## Reading layer `Oekologiske_arealer_2015' from data source `/home/cds-au618771/cds-spatial/groundwater_polution_dk/data/Oekologiske_arealer_2015.shp' using driver `ESRI Shapefile'
-    ## Simple feature collection with 48803 features and 5 fields
-    ## geometry type:  POLYGON
-    ## dimension:      XY
-    ## bbox:           xmin: 445063.1 ymin: 6050576 xmax: 892017.4 ymax: 6391818
-    ## proj4string:    +proj=utm +zone=32 +ellps=GRS80 +units=m +no_defs
-
-``` r
 organic_fields_2016 <- st_read("data/Oekologiske_arealer_2016.shp") %>% na.omit()
-```
-
-    ## Reading layer `Oekologiske_arealer_2016' from data source `/home/cds-au618771/cds-spatial/groundwater_polution_dk/data/Oekologiske_arealer_2016.shp' using driver `ESRI Shapefile'
-    ## Simple feature collection with 59376 features and 5 fields
-    ## geometry type:  POLYGON
-    ## dimension:      XY
-    ## bbox:           xmin: 444745.7 ymin: 6050576 xmax: 892017.4 ymax: 6392806
-    ## proj4string:    +proj=utm +zone=32 +ellps=GRS80 +units=m +no_defs
-
-``` r
 organic_fields_2017 <- st_read("data/Oekologiske_arealer_2017.shp") %>% na.omit()
-```
-
-    ## Reading layer `Oekologiske_arealer_2017' from data source `/home/cds-au618771/cds-spatial/groundwater_polution_dk/data/Oekologiske_arealer_2017.shp' using driver `ESRI Shapefile'
-    ## Simple feature collection with 66344 features and 5 fields
-    ## geometry type:  POLYGON
-    ## dimension:      XY
-    ## bbox:           xmin: 442061.7 ymin: 6050576 xmax: 892017.4 ymax: 6398325
-    ## proj4string:    +proj=utm +zone=32 +ellps=GRS80 +units=m +no_defs
-
-``` r
 organic_fields_2018 <- st_read("data/Oekologiske_arealer_2018.shp") %>% na.omit()
-```
-
-    ## Reading layer `Oekologiske_arealer_2018' from data source `/home/cds-au618771/cds-spatial/groundwater_polution_dk/data/Oekologiske_arealer_2018.shp' using driver `ESRI Shapefile'
-    ## Simple feature collection with 74446 features and 6 fields
-    ## geometry type:  POLYGON
-    ## dimension:      XY
-    ## bbox:           xmin: 442061.7 ymin: 6050576 xmax: 891630.3 ymax: 6398325
-    ## proj4string:    +proj=utm +zone=32 +ellps=GRS80 +units=m +no_defs
-
-``` r
 organic_fields_2019 <- st_read("data/Oekologiske_arealer_2019.shp") %>% na.omit()
-```
-
-    ## Reading layer `Oekologiske_arealer_2019' from data source `/home/cds-au618771/cds-spatial/groundwater_polution_dk/data/Oekologiske_arealer_2019.shp' using driver `ESRI Shapefile'
-    ## Simple feature collection with 80218 features and 6 fields
-    ## geometry type:  POLYGON
-    ## dimension:      XY
-    ## bbox:           xmin: 442061.7 ymin: 6050576 xmax: 891705.8 ymax: 6398325
-    ## proj4string:    +proj=utm +zone=32 +ellps=GRS80 +units=m +no_defs
-
-``` r
 organic_fields_2020 <- st_read("data/Oekologiske_arealer_2020.shp") %>% na.omit()
-```
 
-    ## Reading layer `Oekologiske_arealer_2020' from data source `/home/cds-au618771/cds-spatial/groundwater_polution_dk/data/Oekologiske_arealer_2020.shp' using driver `ESRI Shapefile'
-    ## Simple feature collection with 80916 features and 6 fields
-    ## geometry type:  POLYGON
-    ## dimension:      XY
-    ## bbox:           xmin: 442061.7 ymin: 6050576 xmax: 892069.6 ymax: 6401475
-    ## proj4string:    +proj=utm +zone=32 +ellps=GRS80 +units=m +no_defs
-
-``` r
 # Merge organic field-geometries as "organic_fields":
 organic_fields <- c(organic_fields_2012$geometry, organic_fields_2013$geometry, organic_fields_2014$geometry, organic_fields_2015$geometry, organic_fields_2016$geometry, organic_fields_2017$geometry, organic_fields_2018$geometry, organic_fields_2019$geometry, organic_fields_2020$geometry)
 
@@ -303,24 +178,10 @@ nitrate <- st_set_crs(nitrate, value = 25832)
 
 # Set the projection of the organic fields as EPSG 25832:
 proj4string(organic_fields) <- CRS("+init=epsg:25832")
-```
 
-    ## Warning in `proj4string<-`(`*tmp*`, value = new("CRS", projargs = "+init=epsg:25832 +proj=utm +zone=32 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs")): A new CRS was assigned to an object with an existing CRS:
-    ## +proj=utm +zone=32 +ellps=GRS80 +units=m +no_defs
-    ## without reprojecting.
-    ## For reprojection, use function spTransform
-
-``` r
 # Set the projection of the conventional fields as EPSG 25832:
 proj4string(conventional_fields) <- CRS("+init=epsg:25832")
-```
 
-    ## Warning in `proj4string<-`(`*tmp*`, value = new("CRS", projargs = "+init=epsg:25832 +proj=utm +zone=32 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs")): A new CRS was assigned to an object with an existing CRS:
-    ## +proj=utm +zone=32 +ellps=GRS80 +units=m +no_defs
-    ## without reprojecting.
-    ## For reprojection, use function spTransform
-
-``` r
 # Transform the geometry of the data to the assigned CRS:
 organic_fields <- spTransform(organic_fields, CRS("+init=epsg:25832"))
 conventional_fields <- spTransform(conventional_fields, CRS("+init=epsg:25832"))
