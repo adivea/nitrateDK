@@ -57,29 +57,60 @@ nitrate <- nitrate %>%
 nitrate <- st_as_sf(nitrate, coords = c("longitude", "latitude"))
 ```
 
+Setting CRS (for more info, see written report):
+```{r}
+# Set the projection of the nitrate data as EPSG 25832:
+nitrate <- st_set_crs(nitrate, value = 25832)
+
+# Transform the geometry of the data to the assigned CRS:
+nitrate <- st_transform(nitrate, crs=25832)
+
+# Verify the data has been assigned new CRS:
+st_crs(nitrate)[1]
+```
+
+### Filtering dates between 2012 and 2021:
+```{r}
+nitrate <- nitrate %>%
+ select(measurement_date, nitrate_concentration, geometry, measurement_depth) %>%
+ filter(measurement_date >= as.Date("2012-01-01") & measurement_date <= as.Date("2021-03-10"))
+```
+
+### Remove duplicate entries:
+```{r}
+nitrate <- nitrate[!duplicated(nitrate$geometry), ]
+```
+
 ### Inspecting "nitrate":
 ```{r}
-head(nitrate[,c(9, 11, 12)])
+head(nitrate)
 ```
+
+### Plotting points with nitrate per. mg/l metric:
+```{r}
+ggplot(nitrate, aes(colour = nitrate_concentration)) +
+  geom_sf() + coord_sf(datum = st_crs(25832)) + theme_solarized() + labs(title = "Nitrate measurements:", color = "Nitrate (mg/L)") + scale_colour_gradientn(colors = c("darkgreen", "yellow", "red")) + xlab("Metres") + ylab("Metres")
+```
+
 
 ### Loading land-use data:
 ```{r}
-# Loading "Markblok.shp" which contains all registered fields in Denmark:
-all_fields <- st_read("data/Markblok.shp") %>% na.omit() 
+# Loading "Markblok.shp" which contains all registered fields in Denmark and set CRS as EPSG 25832:
+all_fields <- st_read("data/Markblok.shp") %>% na.omit() %>% st_transform(25832)
 
 # Convert "fields" to SpatialPolygons-object:
 all_fields <- as_Spatial(all_fields$geometry)
 
-# Load all registered ecological fields (from 2012 to 2020):
-organic_fields_2012 <- st_read("data/Oekologiske_arealer_2012.shp") %>% na.omit()
-organic_fields_2013 <- st_read("data/Oekologiske_arealer_2013.shp") %>% na.omit()
-organic_fields_2014 <- st_read("data/Oekologiske_arealer_2014.shp") %>% na.omit()
-organic_fields_2015 <- st_read("data/Oekologiske_arealer_2015.shp") %>% na.omit()
-organic_fields_2016 <- st_read("data/Oekologiske_arealer_2016.shp") %>% na.omit()
-organic_fields_2017 <- st_read("data/Oekologiske_arealer_2017.shp") %>% na.omit()
-organic_fields_2018 <- st_read("data/Oekologiske_arealer_2018.shp") %>% na.omit()
-organic_fields_2019 <- st_read("data/Oekologiske_arealer_2019.shp") %>% na.omit()
-organic_fields_2020 <- st_read("data/Oekologiske_arealer_2020.shp") %>% na.omit()
+# Load all registered ecological fields (from 2012 to 2020) and set CRS as EPSG 25832::
+organic_fields_2012 <- st_read("data/Oekologiske_arealer_2012.shp") %>% na.omit() %>% st_transform(25832)
+organic_fields_2013 <- st_read("data/Oekologiske_arealer_2013.shp") %>% na.omit() %>% st_transform(25832)
+organic_fields_2014 <- st_read("data/Oekologiske_arealer_2014.shp") %>% na.omit() %>% st_transform(25832)
+organic_fields_2015 <- st_read("data/Oekologiske_arealer_2015.shp") %>% na.omit() %>% st_transform(25832)
+organic_fields_2016 <- st_read("data/Oekologiske_arealer_2016.shp") %>% na.omit() %>% st_transform(25832)
+organic_fields_2017 <- st_read("data/Oekologiske_arealer_2017.shp") %>% na.omit() %>% st_transform(25832)
+organic_fields_2018 <- st_read("data/Oekologiske_arealer_2018.shp") %>% na.omit() %>% st_transform(25832)
+organic_fields_2019 <- st_read("data/Oekologiske_arealer_2019.shp") %>% na.omit() %>% st_transform(25832)
+organic_fields_2020 <- st_read("data/Oekologiske_arealer_2020.shp") %>% na.omit() %>% st_transform(25832)
 
 # Merge organic field-geometries as "organic_fields":
 organic_fields <- c(organic_fields_2012$geometry, organic_fields_2013$geometry, organic_fields_2014$geometry, organic_fields_2015$geometry, organic_fields_2016$geometry, organic_fields_2017$geometry, organic_fields_2018$geometry, organic_fields_2019$geometry, organic_fields_2020$geometry)
@@ -120,45 +151,6 @@ plot(conventional_fields, main = "Conventional fields:")
 conventional_fields <- sample(conventional_fields, length(organic_fields))
 ```
 
-### Setting CRS (for more info, see written report):
-```{r}
-# Set the projection of the nitrate data as EPSG 25832:
-nitrate <- st_set_crs(nitrate, value = 25832)
-
-# Set the projection of the organic fields as EPSG 25832:
-proj4string(organic_fields) <- CRS("+init=epsg:25832")
-
-# Set the projection of the conventional fields as EPSG 25832:
-proj4string(conventional_fields) <- CRS("+init=epsg:25832")
-
-# Transform the geometry of the data to the assigned CRS:
-organic_fields <- spTransform(organic_fields, CRS("+init=epsg:25832"))
-conventional_fields <- spTransform(conventional_fields, CRS("+init=epsg:25832"))
-nitrate <- st_transform(nitrate, crs=25832)
-
-# Verify the data has been assigned new CRS:
-st_crs(nitrate)[1]
-crs(organic_fields)
-crs(conventional_fields)
-```
-
-### Filtering dates between 2012 and 2021:
-```{r}
-nitrate <- nitrate %>%
- select(measurement_date, nitrate_concentration, geometry, measurement_depth) %>%
- filter(measurement_date >= as.Date("2012-01-01") & measurement_date <= as.Date("2021-03-10"))
-```
-
-### Remove duplicate entries:
-```{r}
-nitrate <- nitrate[!duplicated(nitrate$geometry), ]
-```
-
-### Plotting the nitrate-data:
-```{r}
-plot(st_geometry(nitrate), pch = 16, cex = 0.4, main = "Nitrate measurements:")
-```
-
 ### Plotting nitrate measurement-points on top of organic fields (to assess CRS allignment):
 ```{r}
 plot(st_geometry(nitrate), pch = 16, cex = 0.4, col = "red", main = "Nitrate measurements (red) and organic fields (black):")
@@ -169,12 +161,6 @@ plot(organic_fields, add = TRUE)
 ```{r}
 plot(st_geometry(nitrate), pch = 16, cex = 0.4, col = "red", main = "Nitrate measurements (red) and conventional fields (black):")
 plot(conventional_fields, add = TRUE)
-```
-
-### Plotting points with nitrate per. mg/l metric:
-```{r}
-ggplot(nitrate, aes(colour = nitrate_concentration)) +
-  geom_sf() + coord_sf(datum = st_crs(25832)) + theme_solarized() + labs(title = "Nitrate measurements:", color = "Nitrate (mg/L)") + scale_colour_gradientn(colors = c("darkgreen", "yellow", "red")) + xlab("Metres") + ylab("Metres")
 ```
 
 # Exploratory statistics:
