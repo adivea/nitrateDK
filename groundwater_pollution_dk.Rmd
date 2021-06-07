@@ -1,162 +1,311 @@
 ---
 title: "groundwater_pollution_dk"
 author: "Johan Horsmans"
-date: "4/26/2021"
+date: "05/06/2021"
 output: github_document
 ---
+# Loading- and preprocessing data:
 
+### Loading packages
 ```{r}
 library(pacman)
-
-p_load(sf, raster, dplyr, tmap, ggplot2, tidyverse, lubridate, sp, gstat)
+p_load(sf, raster, dplyr, tmap, ggplot2, tidyverse, lubridate, sp, gstat, ggthemes, lmtest)
 ```
 
-```{r}
-nitrate <- as.data.frame(read_csv("data/nitrate.csv")) #Load the .csv-file as a dataframe and save it as "nitrate".
+### Loading nitrate data:
+```{r, results='hide'}
+# Load the .csv-file as a dataframe and save it as "nitrate":
+nitrate <- as.data.frame(read_csv("data/nitrate.csv")) 
 
-#Rename columns to remove spaces:
-names(nitrate)[names(nitrate) == "Seneste"] <- "Seneste_måling" 
-names(nitrate)[names(nitrate) == "Seneste mg/l"] <- "Seneste_mgl"
+# Rename columns to remove spaces and odd characters:
+names(nitrate)[names(nitrate) == "Seneste"] <- "measurement_date" 
+names(nitrate)[names(nitrate) == "Seneste mg/l"] <- "nitrate_concentration"
+names(nitrate)[names(nitrate) == "Indtag topdybde"] <- "measurement_depth" 
 ```
 
-Remove outliers
+### Remove outliers (see written report for more info):
 ```{r}
+# Remove all nitrate measures with a nitrate concentration above 200 mg/L:
 nitrate <- nitrate %>%
-  filter_at(vars("Seneste_mgl"), any_vars(. < 200))
+  filter_at(vars("nitrate_concentration"), any_vars(. < 200))
+
+# Remove all nitrate-measures with a measurement depth below 0 (i.e. above ground level):
+nitrate <- nitrate %>%
+  filter_at(vars("measurement_depth"), any_vars(. > 0))
 ```
 
 
-Processing the nitrate.csv-file into a compatible format.
+### Processing the nitrate-dataframe to make it compatible with shapefile-format:
 ```{r}
+# Transform coordinate column to characters:
 nitrate$WKT <- as.character(nitrate$WKT)
+
+# Use Regex to remove non-coordinate characters:
 nitrate$WKT <- gsub("POINT \\(", "", nitrate$WKT)
 nitrate$WKT <- gsub(")", "", nitrate$WKT)
 ```
 
-Separate into two columns
+### Separate coordinates into two columns:
 ```{r}
+# Separate the longitude- and latitude coordinates into separate columns. The coordinates are separated by space (i.e. " "):
 nitrate <- nitrate %>% 
-  separate(col = WKT, into = c("longitude","latitude"), sep = " ")
+  separate(col = WKT, into = c("longitude","latitude"), sep = " ") 
 ```
 
-Making it a shapefile
+### Making it an sf-object:
 ```{r}
 nitrate <- st_as_sf(nitrate, coords = c("longitude", "latitude"))
 ```
 
+### Inspecting "nitrate":
 ```{r}
-markblok<-st_read("data/Markblok.shp") %>% na.omit()
-okologimark<-st_read("data/Oekologiske_arealer_2019.shp") %>% na.omit()
-
-
-head(markblok)
-head(okologimark)
-head(nitrate)
-```
-# Plotting fields
-```{r}
-plot(st_geometry(okologimark))
-plot(st_geometry(markblok))
+head(nitrate[,c(9, 11, 12)])
 ```
 
-
-Setting CRS
+### Loading land-use data:
 ```{r}
-# Set the projection of the nitrate data as EPSG 25832
+# Loading "Markblok.shp" which contains all registered fields in Denmark:
+all_fields <- st_read("data/Markblok.shp") %>% na.omit() 
+
+# Convert "fields" to SpatialPolygons-object:
+all_fields <- as_Spatial(all_fields$geometry)
+
+# Load all registered ecological fields (from 2012 to 2020):
+organic_fields_2012 <- st_read("data/Oekologiske_arealer_2012.shp") %>% na.omit()
+organic_fields_2013 <- st_read("data/Oekologiske_arealer_2013.shp") %>% na.omit()
+organic_fields_2014 <- st_read("data/Oekologiske_arealer_2014.shp") %>% na.omit()
+organic_fields_2015 <- st_read("data/Oekologiske_arealer_2015.shp") %>% na.omit()
+organic_fields_2016 <- st_read("data/Oekologiske_arealer_2016.shp") %>% na.omit()
+organic_fields_2017 <- st_read("data/Oekologiske_arealer_2017.shp") %>% na.omit()
+organic_fields_2018 <- st_read("data/Oekologiske_arealer_2018.shp") %>% na.omit()
+organic_fields_2019 <- st_read("data/Oekologiske_arealer_2019.shp") %>% na.omit()
+organic_fields_2020 <- st_read("data/Oekologiske_arealer_2020.shp") %>% na.omit()
+
+# Merge organic field-geometries as "organic_fields":
+organic_fields <- c(organic_fields_2012$geometry, organic_fields_2013$geometry, organic_fields_2014$geometry, organic_fields_2015$geometry, organic_fields_2016$geometry, organic_fields_2017$geometry, organic_fields_2018$geometry, organic_fields_2019$geometry, organic_fields_2020$geometry)
+
+# Convert "organic_fields" to SpatialPolygons-object:
+organic_fields <- as_Spatial(organic_fields)
+
+# Make a new variable called "conventional_fields", where all polygons in "all_fields" that overlap with the polygons in "organic_fields" are removed:
+conventional_fields <- all_fields[lengths(st_intersects(st_as_sf(all_fields),st_as_sf(organic_fields)))==0,]
+
+# Assess how many organic fields have been filtered out:
+length(all_fields) - length(conventional_fields)
+```
+9756 organic fields have been filtered out. In summary, we have now loaded all nitrate-measurements between 2012 and 2021 and all current organic- and conventional fields.
+
+### Inspecting "conventional_fields" and "organic_fields":
+```{r}
+# Inspect "conventional_fields" and "organic_fields":
+head(conventional_fields)
+
+head(organic_fields)
+```
+
+### Plotting fields:
+```{r}
+# Plot organic fields:
+plot(organic_fields, main = "Organic fields:")
+```
+
+```{r}
+# Plot conventional fields:
+plot(conventional_fields, main = "Conventional fields:")
+```
+
+### Taking subset of conventional fields to reduce computational load (see written report for more info):
+```{r}
+# Subsetting "conventional_fields" to make it contain as many polygons as "organic_fields":
+conventional_fields <- sample(conventional_fields, length(organic_fields))
+```
+
+### Setting CRS (for more info, see written report):
+```{r}
+# Set the projection of the nitrate data as EPSG 25832:
 nitrate <- st_set_crs(nitrate, value = 25832)
-okologimark <- st_set_crs(okologimark, value = 25832)
-markblok <- st_set_crs(markblok, value = 25832)
 
-# Transform the geometry of the data to the assigned CRS. 
+# Set the projection of the organic fields as EPSG 25832:
+proj4string(organic_fields) <- CRS("+init=epsg:25832")
+
+# Set the projection of the conventional fields as EPSG 25832:
+proj4string(conventional_fields) <- CRS("+init=epsg:25832")
+
+# Transform the geometry of the data to the assigned CRS:
+organic_fields <- spTransform(organic_fields, CRS("+init=epsg:25832"))
+conventional_fields <- spTransform(conventional_fields, CRS("+init=epsg:25832"))
 nitrate <- st_transform(nitrate, crs=25832)
-markblok <- st_transform(markblok, crs=25832)
-okologimark <- st_transform(okologimark, crs = 25832)
 
-# Verify the projection is 'projected' not 'geographic'
-head(nitrate) 
-head(markblok)
-head(okologimark)
+# Verify the data has been assigned new CRS:
+st_crs(nitrate)[1]
+crs(organic_fields)
+crs(conventional_fields)
 ```
 
-Filtering dates between 2018 and 2021:
+### Filtering dates between 2012 and 2021:
 ```{r}
 nitrate <- nitrate %>%
- select(Seneste_måling, Seneste_mgl, geometry, `Indtag topdybde`) %>%
- filter(Seneste_måling >= as.Date("2018-01-01") & Seneste_måling <= as.Date("2021-03-10"))
+ select(measurement_date, nitrate_concentration, geometry, measurement_depth) %>%
+ filter(measurement_date >= as.Date("2012-01-01") & measurement_date <= as.Date("2021-03-10"))
 ```
 
-Remove duplicate entries (for the purpose of kriging)
+### Remove duplicate entries:
 ```{r}
-nitrate<-nitrate[!duplicated(nitrate$geometry), ]
+nitrate <- nitrate[!duplicated(nitrate$geometry), ]
 ```
 
-Plotting the points
+### Plotting the nitrate-data:
 ```{r}
-plot(st_geometry(nitrate), pch = 16, cex = 0.4)
+plot(st_geometry(nitrate), pch = 16, cex = 0.4, main = "Nitrate measurements:")
 ```
 
-Plotting points on top of organic fields (to assess CRS allignment)
+### Plotting nitrate measurement-points on top of organic fields (to assess CRS allignment):
 ```{r}
-plot(st_geometry(nitrate), pch = 16, cex = 0.4, col = "red")
-plot(st_geometry(okologimark), add = TRUE)
+plot(st_geometry(nitrate), pch = 16, cex = 0.4, col = "red", main = "Nitrate measurements (red) and organic fields (black):")
+plot(organic_fields, add = TRUE)
 ```
 
-Plotting points on top of all fields (to assess CRS allignment)
+### Plotting points on top of all conventional fields (to assess CRS allignment):
 ```{r}
-plot(st_geometry(markblok))
-plot(st_geometry(nitrate), add = TRUE, pch = 16, cex = 0.4, col = "red")
+plot(st_geometry(nitrate), pch = 16, cex = 0.4, col = "red", main = "Nitrate measurements (red) and conventional fields (black):")
+plot(conventional_fields, add = TRUE)
 ```
 
-
-#Exploratory statistics:
-
-Depth:
+### Plotting points with nitrate per. mg/l metric:
 ```{r}
-summary(nitrate$`Indtag topdybde`)
-sd(nitrate$`Indtag topdybde`)
+ggplot(nitrate, aes(colour = nitrate_concentration)) +
+  geom_sf() + coord_sf(datum = st_crs(25832)) + theme_solarized() + labs(title = "Nitrate measurements:", color = "Nitrate (mg/L)") + scale_colour_gradientn(colors = c("darkgreen", "yellow", "red")) + xlab("Metres") + ylab("Metres")
 ```
 
-Nitrate:
+# Exploratory statistics:
+
+## The following sections is designed to create a plot with depth distributions for nitrate measurements carried out on conventional- and organic fields, respectively (see written report for more info).
+
+### Creating a variable with conventional polygons in list-format:
 ```{r}
-summary(nitrate$Seneste_mgl)
-```
-```{r}
-hist(nitrate$Seneste_mgl)
+conventional_polygon_list <- lapply(conventional_fields@polygons, function(x) SpatialPolygons(list(x)))
 ```
 
-Plotting points with nitrate per. mg/l metric:
-```{r}
-ggplot(nitrate) +
-  geom_sf(aes(col = Seneste_mgl))
-```
-
-# Kriging:
-
-Creating X- and Y-value columns
+### Creating separate columns for nitrate X- and Y coordinates:
 ```{r}
 nitrate$X <- st_coordinates(nitrate)[,1]
 nitrate$Y <- st_coordinates(nitrate)[,2]
 ```
 
-
-Make variogram by fitting X- and Y coordinates to nitrate mg/l with a linear regression
+### Finding nitrate measurements that fall within "conventional_fields" polygons:
 ```{r}
-vgm <- variogram(nitrate$Seneste_mgl ~ X + Y, nitrate)
+# Defining empty matrix for appending point-coordinates:
+point <- matrix(ncol = 2)
+
+# Create matrix with X- and Y coordinates for all nitrate measurements:
+for (i in c(1:length(nitrate$geometry))){ # For the number of elements in in nitrate$geometry...
+  p <- matrix(c(nitrate$X[i], nitrate$Y[i]), ncol = 2, byrow = TRUE) # ... iterate through X- and Y
+  point <- rbind(p, point) # ... Append coordinates to "point"-matrix
+}
+
+# Remove NA in point matrix (generated when initializing the matrix):
+point <- point %>% na.omit()
+
+# Convert the point-matrix to "SpatialPoints"-object:
+points <- SpatialPoints(point)
+
+# Create variable called "conventional_overlap" with a function that goes through all points and polygons in the "conventional_polygon_list". If a point falls within a polygon it returns "1", if not it returns "NA":
+conventional_overlap <- lapply(conventional_polygon_list, function(x) over(points, x))
+
+# Create function that converts the "conventional_overlap"-variable to a regular list, rather than a nested list (for indexing purposes):
+list_transform = function(x, sep = ".") {
+    names(x) = paste0(seq_along(x))
+    while(any(sapply(x, class) == "list")) {
+        ind = sapply(x, class) == "list"
+        temp = unlist(x[ind], recursive = FALSE)
+        names(temp) = paste0(rep(names(x)[ind], lengths(x[ind])),
+                             sep,
+                             sequence(lengths(x[ind])))
+        x = c(x[!ind], temp)
+    }
+    return(x)
+}
+
+# Apply the defined function to the "conventional_overlap"-variable:
+conventional_overlap <- list_transform(conventional_overlap)
+
+# Create a variable "called "indexes", containing all nitrate-measurement-points falling within the conventional-field polygons. Note: the format is: "polygon:point":
+indexes <- names(which(unlist(conventional_overlap) == 1))
+
+# Print indexes:
+indexes
+
+# Remove the "polygon"-index (i.e. the index before the ".")
+indexes <- gsub("^[^.]+.", "", indexes)
+
+# Transform to numeric variable:
+indexes <- as.numeric(indexes)
+
+# Create a new column called "land_type" and fill it with "out of bounds":
+nitrate$land_type <- "out of bounds"
+
+# Change the value for "land_type" to "conventional" for all the nitrate measurements overlapping with conventional field polygons:
+for (i in indexes) {
+  nitrate$land_type[i] <- "conventional"
+}
+```
+
+### Finding nitrate measurements that fall within "organic_fields" polygons:
+```{r}
+organic_polygon_list <- lapply(organic_fields@polygons, function(x) SpatialPolygons(list(x)))
+```
+
+```{r}
+# Create variable called "organic_overlap" with a function that goes through all points and polygons in the "organic_polygon_list". If a point falls within a polygon it returns "1", if not it returns "NA":
+organic_overlap <- lapply(organic_polygon_list, function(x) over(points, x))
+
+# Apply the defined function to the "organic_overlap"-variable:
+organic_overlap <- list_transform(organic_overlap)
+
+# Create a variable "called "indexes", containing all nitrate-measurement-points falling within the organic-field polygons. Note: the format is: "polygon:point":
+indexes <- names(which(unlist(organic_overlap) == 1))
+
+# Print indexes:
+indexes
+
+# Remove the "polygon"-index (i.e. the index before the ".")
+indexes <- gsub("^[^.]+.", "", indexes)
+
+# Transform to numeric variable:
+indexes <- as.numeric(indexes)
+
+# Change the value for "land_type" to "organic" for all the nitrate measurements overlapping with organic field polygons:
+for (i in indexes) {
+  nitrate$land_type[i] <- "organic"
+}
+```
+
+### Plotting:
+```{r}
+ggplot() +
+  geom_density(nitrate, mapping = aes(measurement_depth, colour = land_type)) + theme_solarized() + scale_colour_solarized() + labs(title = "Depth density plot:", color = "Nitrate (mg/L)") + xlab("Measurement depth") + ylab("Density")
+```
+
+
+# Kriging:
+
+### Make variogram by fitting X- and Y coordinates to nitrate mg/L:
+```{r}
+vgm <- variogram(nitrate$nitrate_concentration ~ X + Y, nitrate)
 plot(vgm)
 ```
 
-ADELAS TEXT: "You might imagine that if soil at a particular point is nutrient-rich, then soil one metre away is likely to be fertile too. But can you say the same thing about soil one kilometre away, or ten kilometres, or one hundred kilometres?"
+As seen in the plot above, it appears that it is quite hard to find clear spatial correlations in the data. Nonetheless, it appears that measurements within 55000 meters of each other are more correlated than those further away. As such, we argue that this model can be used for kriging, since it only needs to interpolate data that is close to "real" data" (see written report for more info).
 
-JOHANS TEXT: "It appears that it is very hard to find spatial correlations in the data. Nonetheles, it appears that the first 30000 (units) are more correlated than those further away. As such, we argue that this model can be used for kriging, since it only needs to interpolate data that is close to "real" data".
-
-Fit a model to the variogram:
+### Fit a model to the variogram:
 
 ```{r}
-# Eyeball the variogram and estimate the initial parameters (ADELA TEXT)
-nugget <- 550
-psill <- -360
-range <- 45000
-# Fit the variogram (ADELA TEXT)
+# Use the above variogram to eyeball model parameters:
+nugget <- 550 # Initial value.
+psill <- 70 # Ceiling - nugget.
+range <- 55000 # Point where spatial correlation stops. 
+
+# Fit the variogram to data:
 v_model <- fit.variogram(
   vgm, 
   model = vgm(
@@ -167,76 +316,156 @@ v_model <- fit.variogram(
     kappa = 0.5
   )
 )
+
 # Show the fitted variogram on top of the binned variogram (ADELA TEXT)
 plot(vgm, model = v_model)
-print(v_model)
 ```
 
-# Create prediction grid (ALL COMMENTING IS ADELA)
+### Create kriging grid
 ```{r}
-# Create geo_bounds bounding box for kaz_geo 
-geo_bounds <- st_make_grid(nitrate$geometry, n=1)
-# Plot the bounding box polygon and points
-plot(nitrate$geometry); plot(geo_bounds, add= TRUE) 
-# Find the left bottom corner of the bounding box
+# Find the dimensions of the nitrate data:
 st_bbox(nitrate)
-# Define a 0.5km square grid over the polygon extent. The first parameter is the bottom left corner.
 
-grid <- GridTopology(c(446734,6054448), c(2000, 2000), c(222, 173))
-# Create points with the same coordinate system as the boundary box
-crs(nitrate)
-gridpoints <- SpatialPoints(grid, proj4string = CRS(projection("+proj=utm +zone=32 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs "))) # CHECK CRS
+# Using the st_bbox output, manually design a grid slightly larger than the bounding box (for prettier plots). Specify that the kriging resolution should be 2000 meter pr. estimate:
+grid <- GridTopology(c(430734,6040448), c(2000, 2000), c(236, 190))
 
-#UNIQUE
-#the_crs <- crs(nitrate, asText = TRUE)
-#gridpoints <- st_set_crs(gridpoints, the_crs) # Project the "zion"-dataset into the srtm-crs and save it as "zion2".
-#### UNIQUE END
+# Make the grid a GridTopology-object with the same CRS as the nitrate data:
+gridpoints <- SpatialPoints(grid, proj4string = CRS(projection("+init=epsg:25832 +proj=utm +zone=32 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m
++no_defs")))
 
-plot(gridpoints); plot(geo_bounds, col = "red", add = TRUE)
-# Crop out the points outside the boundary
-cropped_gridpoints <- crop(gridpoints, as(geo_bounds, "Spatial"))
-plot(cropped_gridpoints);  plot(geo_bounds, col = "red", add = TRUE)
-# Convert to SpatialPixels
-spgrid <- SpatialPixels(cropped_gridpoints)
+# Convert gridpoint to SpatialPixels:
+spgrid <- SpatialPixels(gridpoints)
+
+# Define coordinate names to be X and Y:
 coordnames(spgrid) <- c("X", "Y")
+
+# Plot the grid:
 plot(spgrid)
 ```
 
 
-# Using fitted variogram model to interpolate new data to the grid
+### Use fitted variogram model to interpolate new data to the grid defined above
 
-ADELA: "Use the spatial pixel grid of the region, `spgrid`, and the variogram model of OM, `v_model` from previous exercises."
 
 ```{r}
-# Adjust the kaz_geo CRS to be consistent with spgrid
-crs(as(nitrate, "Spatial"), asText = TRUE) == crs(spgrid, asText = TRUE)
-# Despite the statement above krige() is erroring out due to CRS misalignment, so forcing it here:
+# Force the nitrate CRS to be consistent with spgrid (otherwise error messages ensue):
 nitrate_sp <- as(nitrate, "Spatial")
 crs(nitrate_sp) <- crs(spgrid)
-# Do kriging predictions over the grid
-nitrate_grid <- krige(Seneste_mgl ~ X + Y, nitrate_sp, newdata = spgrid, model = v_model)
-# Plot the soil-nutrient predictions in a grid
 
+# Do kriging interpolations over the grid
+nitrate_grid <- krige(nitrate_concentration ~ X + Y, nitrate_sp, newdata = spgrid, model = v_model)
 
+# Plot the nitrate measurements on top of the kriged "nitrate_grid":
 
-#UNIQUE:
-#Plotting raster:
+# Plotting raster:
 tm_shape(nitrate_grid[1])  +
   tm_raster(title = "Nitrate mg/l", 
             style = "cont",
             palette = "-RdYlGn") +
   tm_credits(text = "Johan Horsmans & Emil Jessen") +
-  tm_layout(main.title = "Nitrate pollution map")
+  tm_layout(main.title = "Nitrate concentrations in Denmark:") +
+  
+# Nitrate measurements overlayed on raster:
+tm_shape(nitrate) +
+  tm_dots()
+```
 
-#Points overlayed on raster:
-tm_shape(nitrate_grid[1])  +
+### Load DK map
+```{r}
+DK <- st_read("data/denmark_administrative_outline_boundary.shp")
+```
+
+### Inspect CRS
+```{r}
+head(DK)
+```
+
+We see that the map has the wrong CRS (i.e. 4326).
+
+### Set correct CRS:
+```{r}
+# Set the projection of the DK-map as EPSG 25832:
+DK <- st_set_crs(DK, value = 4326)
+
+# Transform the geometry of the map to the assigned CRS:
+DK <- st_transform(DK, crs=25832)
+```
+
+### Inspect CRS:
+```{r}
+head(DK)
+```
+### Crop raster to fit DK map (i.e. remove excess interpolations):
+```{r}
+nitrate_raster <- raster(nitrate_grid)
+
+nitrate_grid_cropped <- crop(nitrate_raster, extent(DK))
+nitrate_grid_cropped <- raster::mask(nitrate_raster, DK)
+```
+
+### Make plot of interpolated data with DK map and nitrate measurements on top:
+```{r}
+# Plotting raster:
+tm_shape(nitrate_grid_cropped)  +
   tm_raster(title = "Nitrate mg/l", 
             style = "cont",
             palette = "-RdYlGn") +
+  
+# Adding DK-map:
+tm_shape(DK) + 
+  tm_polygons(alpha = 0.3) +
+  
+# Adding nitrate measurements overlayed on raster:
 tm_shape(nitrate) +
-  tm_dots()
-###
+  tm_dots(col = "grey27") +
 
+# Adding legend, credits and scale bar:
+  tm_credits(text = "Johan Horsmans & Emil Jessen") +
+  tm_layout(main.title = "Nitrate concentrations in Denmark:",
+            legend.position = c("right","top"),
+            legend.bg.color = "white", legend.bg.alpha = .2, 
+            legend.frame = "gray50",
+            bg.color = "lightblue") + tm_add_legend(type = "symbol",  labels = "Nitrate measurements", shape = 20, col = "grey27") + 
+  tm_scale_bar(breaks = c(20, 40, 60, 80, 100))
+```
+
+# Statistical modeling:
+
+### Extracting all kriged nitrate-values falling within organic fields:
+```{r}
+# Extract kriged nitrate data (r) that fall "within organic_fields":
+organic_extraction <- suppressWarnings(raster::extract(x=nitrate_raster, y=organic_fields, fun=mean, df=TRUE, na.rm=TRUE))
+
+# Add column land_type and specify that it should be "organic":
+organic_extraction$land_type <- "organic"
 ```
 
 
+### Extracting all kriged nitrate-values falling within conventional fields:
+
+```{r}
+# Extract kriged nitrate data (r) that fall "within conventional_fields":
+conventional_extraction <- suppressWarnings(raster::extract(x=nitrate_raster, y=conventional_fields, fun=mean, df=TRUE, na.rm=TRUE))
+
+# Add column land_type and specify that it should be "conventional":
+conventional_extraction$land_type <- "conventional"
+```
+
+### Merge the extraced data:
+
+```{r}
+# Merge the extracted data as "merged":
+merged <- rbind(organic_extraction, conventional_extraction)
+```
+
+
+Fit linear regression model with nitrate concentration predicted by land type:
+```{r}
+# Fit linear regression model with nitrate concentration (var1.pred) ~ land_type:
+lm_model <- lm(var1.pred ~ land_type, data = merged)
+
+# Perform coefficient t-test:
+coeftest(lm_model, type = "HC1")
+```
+
+For interpretation of output, see written report.

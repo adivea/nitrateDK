@@ -1,191 +1,84 @@
 groundwater\_pollution\_dk
 ================
 Johan Horsmans
-4/26/2021
+05/06/2021
+
+# Loading- and preprocessing data:
+
+### Loading packages
 
 ``` r
 library(pacman)
-
-p_load(sf, raster, dplyr, tmap, ggplot2, tidyverse, lubridate, sp, gstat)
+p_load(sf, raster, dplyr, tmap, ggplot2, tidyverse, lubridate, sp, gstat, ggthemes, lmtest)
 ```
 
+### Loading nitrate data:
+
 ``` r
-nitrate <- as.data.frame(read_csv("data/nitrate.csv")) #Load the .csv-file as a dataframe and save it as "nitrate".
+# Load the .csv-file as a dataframe and save it as "nitrate":
+nitrate <- as.data.frame(read_csv("data/nitrate.csv")) 
+
+# Rename columns to remove spaces and odd characters:
+names(nitrate)[names(nitrate) == "Seneste"] <- "measurement_date" 
+names(nitrate)[names(nitrate) == "Seneste mg/l"] <- "nitrate_concentration"
+names(nitrate)[names(nitrate) == "Indtag topdybde"] <- "measurement_depth" 
 ```
 
-    ## 
-    ## ── Column specification ────────────────────────────────────────────────────────
-    ## cols(
-    ##   WKT = col_character(),
-    ##   `Vis data` = col_character(),
-    ##   DGUnr. = col_character(),
-    ##   Borerapport = col_character(),
-    ##   Indtag = col_double(),
-    ##   Analyser = col_double(),
-    ##   `Median mg/l` = col_double(),
-    ##   `Min. mg/l` = col_double(),
-    ##   `Maks. mg/l` = col_double(),
-    ##   `Indtag topdybde` = col_double(),
-    ##   `Topdybde forklaret` = col_character(),
-    ##   Seneste = col_date(format = ""),
-    ##   `Seneste mg/l` = col_double(),
-    ##   objectid = col_double(),
-    ##   symbol_ident = col_character(),
-    ##   symbol_size = col_double(),
-    ##   symbol_txt_size = col_double(),
-    ##   txt_search = col_character(),
-    ##   rgb = col_character()
-    ## )
+### Remove outliers (see written report for more info):
 
 ``` r
-#Rename columns to remove spaces:
-names(nitrate)[names(nitrate) == "Seneste"] <- "Seneste_måling" 
-names(nitrate)[names(nitrate) == "Seneste mg/l"] <- "Seneste_mgl"
-```
-
-Remove outliers
-
-``` r
+# Remove all nitrate measures with a nitrate concentration above 200 mg/L:
 nitrate <- nitrate %>%
-  filter_at(vars("Seneste_mgl"), any_vars(. < 200))
+  filter_at(vars("nitrate_concentration"), any_vars(. < 200))
+
+# Remove all nitrate-measures with a measurement depth below 0 (i.e. above ground level):
+nitrate <- nitrate %>%
+  filter_at(vars("measurement_depth"), any_vars(. > 0))
 ```
 
-Processing the nitrate.csv-file into a compatible format.
+### Processing the nitrate-dataframe to make it compatible with shapefile-format:
 
 ``` r
+# Transform coordinate column to characters:
 nitrate$WKT <- as.character(nitrate$WKT)
+
+# Use Regex to remove non-coordinate characters:
 nitrate$WKT <- gsub("POINT \\(", "", nitrate$WKT)
 nitrate$WKT <- gsub(")", "", nitrate$WKT)
 ```
 
-Separate into two columns
+### Separate coordinates into two columns:
 
 ``` r
+# Separate the longitude- and latitude coordinates into separate columns. The coordinates are separated by space (i.e. " "):
 nitrate <- nitrate %>% 
-  separate(col = WKT, into = c("longitude","latitude"), sep = " ")
+  separate(col = WKT, into = c("longitude","latitude"), sep = " ") 
 ```
 
-Making it a shapefile
+### Making it an sf-object:
 
 ``` r
 nitrate <- st_as_sf(nitrate, coords = c("longitude", "latitude"))
 ```
 
-``` r
-markblok<-st_read("data/Markblok.shp") %>% na.omit()
-```
-
-    ## Reading layer `Markblok' from data source `/home/cds-au618771/cds-spatial/groundwater_polution_dk/data/Markblok.shp' using driver `ESRI Shapefile'
-    ## replacing null geometries with empty geometries
-    ## Simple feature collection with 476658 features and 6 fields (with 1 geometry empty)
-    ## geometry type:  POLYGON
-    ## dimension:      XY
-    ## bbox:           xmin: 442061.7 ymin: 6049864 xmax: 892661.5 ymax: 6401571
-    ## proj4string:    +proj=utm +zone=32 +ellps=GRS80 +units=m +no_defs
+### Inspecting “nitrate”:
 
 ``` r
-okologimark<-st_read("data/Oekologiske_arealer_2019.shp") %>% na.omit()
+head(nitrate[,c(9, 11, 12)])
 ```
 
-    ## Reading layer `Oekologiske_arealer_2019' from data source `/home/cds-au618771/cds-spatial/groundwater_polution_dk/data/Oekologiske_arealer_2019.shp' using driver `ESRI Shapefile'
-    ## Simple feature collection with 80218 features and 6 fields
-    ## geometry type:  POLYGON
-    ## dimension:      XY
-    ## bbox:           xmin: 442061.7 ymin: 6050576 xmax: 891705.8 ymax: 6398325
-    ## proj4string:    +proj=utm +zone=32 +ellps=GRS80 +units=m +no_defs
-
-``` r
-head(markblok)
-```
-
-    ## Simple feature collection with 6 features and 6 fields
-    ## geometry type:  POLYGON
-    ## dimension:      XY
-    ## bbox:           xmin: 453275.5 ymin: 6094145 xmax: 555429.2 ymax: 6243069
-    ## proj4string:    +proj=utm +zone=32 +ellps=GRS80 +units=m +no_defs 
-    ##      BLOKNR  ORTOAAR MODSTORTO BRUTTOAREA TARAAREAL BLOKTYPE
-    ## 2 480178-34     2017         N      15.89         0      OMD
-    ## 3 555243-81 SOP 2018         N       1.00         0      PGR
-    ## 4 542094-82 SOP 2018         N       1.05         0      PGR
-    ## 5 537145-26     2018         N       6.67         0      OMD
-    ## 6 508213-72     2018         N       5.22         0      OMD
-    ## 7 453161-37 SOP 2018         N       2.10         0      OMD
-    ##                         geometry
-    ## 2 POLYGON ((480012.5 6178057,...
-    ## 3 POLYGON ((555298.4 6243005,...
-    ## 4 POLYGON ((542803.8 6094182,...
-    ## 5 POLYGON ((536933.1 6145424,...
-    ## 6 POLYGON ((508505.5 6212914,...
-    ## 7 POLYGON ((453275.5 6161741,...
-
-``` r
-head(okologimark)
-```
-
-    ## Simple feature collection with 6 features and 6 fields
-    ## geometry type:  POLYGON
-    ## dimension:      XY
-    ## bbox:           xmin: 585547.5 ymin: 6209806 xmax: 716017.1 ymax: 6240422
-    ## proj4string:    +proj=utm +zone=32 +ellps=GRS80 +units=m +no_defs 
-    ##      Marknr Afmeldings  Journalnr AutNR_Iden Omlaegning OML
-    ## 1       1-0 2019-09-01 19-0042610    1102304 1999-10-01   1
-    ## 2      10-0 2019-09-01 19-0042610    1102304 1999-10-01   1
-    ## 3       3-0 2019-09-01 19-0042610    1102304 1999-10-01   1
-    ## 4       1-1 2019-09-01 19-0042610    1102304 2016-04-19   1
-    ## 2031     24 2019-07-05 19-0002394     887779 1999-09-01   1
-    ## 2032     22 2019-07-05 19-0002394     887779 1999-09-01   1
-    ##                            geometry
-    ## 1    POLYGON ((715557.6 6209971,...
-    ## 2    POLYGON ((715774.1 6209897,...
-    ## 3    POLYGON ((715706.4 6209942,...
-    ## 4    POLYGON ((715438.6 6209932,...
-    ## 2031 POLYGON ((585699.9 6240201,...
-    ## 2032 POLYGON ((585864.4 6240098,...
-
-``` r
-head(nitrate)
-```
-
-    ## Simple feature collection with 6 features and 18 fields
+    ## Simple feature collection with 6 features and 3 fields
     ## geometry type:  POINT
     ## dimension:      XY
     ## bbox:           xmin: 475687 ymin: 6095070 xmax: 707352 ymax: 6377856
     ## CRS:            NA
-    ##                                                        Vis data    DGUnr.
-    ## 1 http://data.geus.dk/JupiterWWW/proeve.jsp?proeveid=2008094446   5.  921
-    ## 2 http://data.geus.dk/JupiterWWW/proeve.jsp?proeveid=2020051024 132. 2480
-    ## 3 http://data.geus.dk/JupiterWWW/proeve.jsp?proeveid=2018025191 200. 9609
-    ## 4 http://data.geus.dk/JupiterWWW/proeve.jsp?proeveid=2019018210  94. 2838
-    ## 5 http://data.geus.dk/JupiterWWW/proeve.jsp?proeveid=1996010161 233.   10
-    ## 6 http://data.geus.dk/JupiterWWW/proeve.jsp?proeveid=2006386596 217.  510
-    ##                                                     Borerapport Indtag Analyser
-    ## 1    http://data.geus.dk/JupiterWWW/borerapport.jsp?dgunr=5.921      1        1
-    ## 2 http://data.geus.dk/JupiterWWW/borerapport.jsp?dgunr=132.2480     NA        1
-    ## 3 http://data.geus.dk/JupiterWWW/borerapport.jsp?dgunr=200.9609      1        1
-    ## 4  http://data.geus.dk/JupiterWWW/borerapport.jsp?dgunr=94.2838      1        1
-    ## 5   http://data.geus.dk/JupiterWWW/borerapport.jsp?dgunr=233.10      1        1
-    ## 6  http://data.geus.dk/JupiterWWW/borerapport.jsp?dgunr=217.510      1        1
-    ##   Median mg/l Min. mg/l Maks. mg/l Indtag topdybde
-    ## 1           2         2          2             2.0
-    ## 2           2         2          2             4.0
-    ## 3           2         2          2             1.0
-    ## 4           2         2          2            55.0
-    ## 5           2         2          2            36.0
-    ## 6           2         2          2            21.1
-    ##              Topdybde forklaret Seneste_måling Seneste_mgl   objectid
-    ## 1              Dybdetop anvendt     1989-06-01           2 2008094446
-    ## 2 Boringdybde minus 2 m anvendt     1997-09-16           2 2020051024
-    ## 3              Dybdetop anvendt     2016-10-31           2 2018025191
-    ## 4              Dybdetop anvendt     2019-09-25           2 2019018210
-    ## 5              Dybdetop anvendt     1995-06-12           2 1996010161
-    ## 6              Dybdetop anvendt     1968-03-12           2 2006386596
-    ##   symbol_ident symbol_size symbol_txt_size txt_search     rgb
-    ## 1         NUM5          12               7    5.  921 0 255 0
-    ## 2         NUM5          12               7  132. 2480 0 255 0
-    ## 3         NUM3          12               7  200. 9609 0 255 0
-    ## 4         NUM2          22              11   94. 2838 0 255 0
-    ## 5         NUM5          19              10  233.   10 0 255 0
-    ## 6         NUM5          16               9  217.  510 0 255 0
+    ##   measurement_depth measurement_date nitrate_concentration
+    ## 1               2.0       1989-06-01                     2
+    ## 2               4.0       1997-09-16                     2
+    ## 3               1.0       2016-10-31                     2
+    ## 4              55.0       2019-09-25                     2
+    ## 5              36.0       1995-06-12                     2
+    ## 6              21.1       1968-03-12                     2
     ##                 geometry
     ## 1 POINT (557818 6377856)
     ## 2 POINT (508877 6148371)
@@ -194,257 +87,333 @@ head(nitrate)
     ## 5 POINT (707352 6095070)
     ## 6 POINT (690302 6134155)
 
-# Plotting fields
+### Loading land-use data:
 
 ``` r
-plot(st_geometry(okologimark))
+# Loading "Markblok.shp" which contains all registered fields in Denmark:
+all_fields <- st_read("data/Markblok.shp") %>% na.omit() 
+
+# Convert "fields" to SpatialPolygons-object:
+all_fields <- as_Spatial(all_fields$geometry)
+
+# Load all registered ecological fields (from 2012 to 2020):
+organic_fields_2012 <- st_read("data/Oekologiske_arealer_2012.shp") %>% na.omit()
+organic_fields_2013 <- st_read("data/Oekologiske_arealer_2013.shp") %>% na.omit()
+organic_fields_2014 <- st_read("data/Oekologiske_arealer_2014.shp") %>% na.omit()
+organic_fields_2015 <- st_read("data/Oekologiske_arealer_2015.shp") %>% na.omit()
+organic_fields_2016 <- st_read("data/Oekologiske_arealer_2016.shp") %>% na.omit()
+organic_fields_2017 <- st_read("data/Oekologiske_arealer_2017.shp") %>% na.omit()
+organic_fields_2018 <- st_read("data/Oekologiske_arealer_2018.shp") %>% na.omit()
+organic_fields_2019 <- st_read("data/Oekologiske_arealer_2019.shp") %>% na.omit()
+organic_fields_2020 <- st_read("data/Oekologiske_arealer_2020.shp") %>% na.omit()
+
+# Merge organic field-geometries as "organic_fields":
+organic_fields <- c(organic_fields_2012$geometry, organic_fields_2013$geometry, organic_fields_2014$geometry, organic_fields_2015$geometry, organic_fields_2016$geometry, organic_fields_2017$geometry, organic_fields_2018$geometry, organic_fields_2019$geometry, organic_fields_2020$geometry)
+
+# Convert "organic_fields" to SpatialPolygons-object:
+organic_fields <- as_Spatial(organic_fields)
+
+# Make a new variable called "conventional_fields", where all polygons in "all_fields" that overlap with the polygons in "organic_fields" are removed:
+conventional_fields <- all_fields[lengths(st_intersects(st_as_sf(all_fields),st_as_sf(organic_fields)))==0,]
+
+# Assess how many organic fields have been filtered out:
+length(all_fields) - length(conventional_fields)
 ```
 
-![](groundwater_pollution_dk_files/figure-gfm/unnamed-chunk-8-1.png)<!-- -->
+    ## [1] 9756
+
+9756 organic fields have been filtered out. In summary, we have now
+loaded all nitrate-measurements between 2012 and 2021 and all current
+organic- and conventional fields.
+
+### Inspecting “conventional\_fields” and “organic\_fields”:
 
 ``` r
-plot(st_geometry(markblok))
+# Inspect "conventional_fields" and "organic_fields":
+head(conventional_fields)
 ```
 
-![](groundwater_pollution_dk_files/figure-gfm/unnamed-chunk-8-2.png)<!-- -->
-
-Setting CRS
+    ## class       : SpatialPolygons 
+    ## features    : 1 
+    ## extent      : 480012.5, 480504.3, 6177890, 6178556  (xmin, xmax, ymin, ymax)
+    ## crs         : +proj=utm +zone=32 +ellps=GRS80 +units=m +no_defs
 
 ``` r
-# Set the projection of the nitrate data as EPSG 25832
+head(organic_fields)
+```
+
+    ## class       : SpatialPolygons 
+    ## features    : 1 
+    ## extent      : 530727.8, 530839.2, 6288276, 6288385  (xmin, xmax, ymin, ymax)
+    ## crs         : +proj=utm +zone=32 +ellps=GRS80 +units=m +no_defs
+
+### Plotting fields:
+
+``` r
+# Plot organic fields:
+plot(organic_fields, main = "Organic fields:")
+```
+
+![](groundwater_pollution_dk_files/figure-gfm/unnamed-chunk-10-1.png)<!-- -->
+
+``` r
+# Plot conventional fields:
+plot(conventional_fields, main = "Conventional fields:")
+```
+
+![](groundwater_pollution_dk_files/figure-gfm/unnamed-chunk-11-1.png)<!-- -->
+
+### Taking subset of conventional fields to reduce computational load (see written report for more info):
+
+``` r
+# Subsetting "conventional_fields" to make it contain as many polygons as "organic_fields":
+conventional_fields <- sample(conventional_fields, length(organic_fields))
+```
+
+### Setting CRS (for more info, see written report):
+
+``` r
+# Set the projection of the nitrate data as EPSG 25832:
 nitrate <- st_set_crs(nitrate, value = 25832)
-okologimark <- st_set_crs(okologimark, value = 25832)
-markblok <- st_set_crs(markblok, value = 25832)
-```
 
-    ## Warning: st_crs<- : replacing crs does not reproject data; use st_transform for
-    ## that
+# Set the projection of the organic fields as EPSG 25832:
+proj4string(organic_fields) <- CRS("+init=epsg:25832")
 
-``` r
-# Transform the geometry of the data to the assigned CRS. 
+# Set the projection of the conventional fields as EPSG 25832:
+proj4string(conventional_fields) <- CRS("+init=epsg:25832")
+
+# Transform the geometry of the data to the assigned CRS:
+organic_fields <- spTransform(organic_fields, CRS("+init=epsg:25832"))
+conventional_fields <- spTransform(conventional_fields, CRS("+init=epsg:25832"))
 nitrate <- st_transform(nitrate, crs=25832)
-markblok <- st_transform(markblok, crs=25832)
-okologimark <- st_transform(okologimark, crs = 25832)
 
-# Verify the projection is 'projected' not 'geographic'
-head(nitrate) 
+# Verify the data has been assigned new CRS:
+st_crs(nitrate)[1]
 ```
 
-    ## Simple feature collection with 6 features and 18 fields
-    ## geometry type:  POINT
-    ## dimension:      XY
-    ## bbox:           xmin: 475687 ymin: 6095070 xmax: 707352 ymax: 6377856
-    ## CRS:            EPSG:25832
-    ##                                                        Vis data    DGUnr.
-    ## 1 http://data.geus.dk/JupiterWWW/proeve.jsp?proeveid=2008094446   5.  921
-    ## 2 http://data.geus.dk/JupiterWWW/proeve.jsp?proeveid=2020051024 132. 2480
-    ## 3 http://data.geus.dk/JupiterWWW/proeve.jsp?proeveid=2018025191 200. 9609
-    ## 4 http://data.geus.dk/JupiterWWW/proeve.jsp?proeveid=2019018210  94. 2838
-    ## 5 http://data.geus.dk/JupiterWWW/proeve.jsp?proeveid=1996010161 233.   10
-    ## 6 http://data.geus.dk/JupiterWWW/proeve.jsp?proeveid=2006386596 217.  510
-    ##                                                     Borerapport Indtag Analyser
-    ## 1    http://data.geus.dk/JupiterWWW/borerapport.jsp?dgunr=5.921      1        1
-    ## 2 http://data.geus.dk/JupiterWWW/borerapport.jsp?dgunr=132.2480     NA        1
-    ## 3 http://data.geus.dk/JupiterWWW/borerapport.jsp?dgunr=200.9609      1        1
-    ## 4  http://data.geus.dk/JupiterWWW/borerapport.jsp?dgunr=94.2838      1        1
-    ## 5   http://data.geus.dk/JupiterWWW/borerapport.jsp?dgunr=233.10      1        1
-    ## 6  http://data.geus.dk/JupiterWWW/borerapport.jsp?dgunr=217.510      1        1
-    ##   Median mg/l Min. mg/l Maks. mg/l Indtag topdybde
-    ## 1           2         2          2             2.0
-    ## 2           2         2          2             4.0
-    ## 3           2         2          2             1.0
-    ## 4           2         2          2            55.0
-    ## 5           2         2          2            36.0
-    ## 6           2         2          2            21.1
-    ##              Topdybde forklaret Seneste_måling Seneste_mgl   objectid
-    ## 1              Dybdetop anvendt     1989-06-01           2 2008094446
-    ## 2 Boringdybde minus 2 m anvendt     1997-09-16           2 2020051024
-    ## 3              Dybdetop anvendt     2016-10-31           2 2018025191
-    ## 4              Dybdetop anvendt     2019-09-25           2 2019018210
-    ## 5              Dybdetop anvendt     1995-06-12           2 1996010161
-    ## 6              Dybdetop anvendt     1968-03-12           2 2006386596
-    ##   symbol_ident symbol_size symbol_txt_size txt_search     rgb
-    ## 1         NUM5          12               7    5.  921 0 255 0
-    ## 2         NUM5          12               7  132. 2480 0 255 0
-    ## 3         NUM3          12               7  200. 9609 0 255 0
-    ## 4         NUM2          22              11   94. 2838 0 255 0
-    ## 5         NUM5          19              10  233.   10 0 255 0
-    ## 6         NUM5          16               9  217.  510 0 255 0
-    ##                 geometry
-    ## 1 POINT (557818 6377856)
-    ## 2 POINT (508877 6148371)
-    ## 3 POINT (701255 6174649)
-    ## 4 POINT (475687 6208449)
-    ## 5 POINT (707352 6095070)
-    ## 6 POINT (690302 6134155)
+    ## $input
+    ## [1] "EPSG:25832"
 
 ``` r
-head(markblok)
+crs(organic_fields)
 ```
 
-    ## Simple feature collection with 6 features and 6 fields
-    ## geometry type:  POLYGON
-    ## dimension:      XY
-    ## bbox:           xmin: 453275.5 ymin: 6094145 xmax: 555429.2 ymax: 6243069
-    ## CRS:            EPSG:25832
-    ##      BLOKNR  ORTOAAR MODSTORTO BRUTTOAREA TARAAREAL BLOKTYPE
-    ## 2 480178-34     2017         N      15.89         0      OMD
-    ## 3 555243-81 SOP 2018         N       1.00         0      PGR
-    ## 4 542094-82 SOP 2018         N       1.05         0      PGR
-    ## 5 537145-26     2018         N       6.67         0      OMD
-    ## 6 508213-72     2018         N       5.22         0      OMD
-    ## 7 453161-37 SOP 2018         N       2.10         0      OMD
-    ##                         geometry
-    ## 2 POLYGON ((480012.5 6178057,...
-    ## 3 POLYGON ((555298.4 6243005,...
-    ## 4 POLYGON ((542803.8 6094182,...
-    ## 5 POLYGON ((536933.1 6145424,...
-    ## 6 POLYGON ((508505.5 6212914,...
-    ## 7 POLYGON ((453275.5 6161741,...
+    ## CRS arguments:
+    ##  +init=epsg:25832 +proj=utm +zone=32 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0
+    ## +units=m +no_defs
 
 ``` r
-head(okologimark)
+crs(conventional_fields)
 ```
 
-    ## Simple feature collection with 6 features and 6 fields
-    ## geometry type:  POLYGON
-    ## dimension:      XY
-    ## bbox:           xmin: 585547.5 ymin: 6209806 xmax: 716017.1 ymax: 6240422
-    ## CRS:            EPSG:25832
-    ##      Marknr Afmeldings  Journalnr AutNR_Iden Omlaegning OML
-    ## 1       1-0 2019-09-01 19-0042610    1102304 1999-10-01   1
-    ## 2      10-0 2019-09-01 19-0042610    1102304 1999-10-01   1
-    ## 3       3-0 2019-09-01 19-0042610    1102304 1999-10-01   1
-    ## 4       1-1 2019-09-01 19-0042610    1102304 2016-04-19   1
-    ## 2031     24 2019-07-05 19-0002394     887779 1999-09-01   1
-    ## 2032     22 2019-07-05 19-0002394     887779 1999-09-01   1
-    ##                            geometry
-    ## 1    POLYGON ((715557.6 6209971,...
-    ## 2    POLYGON ((715774.1 6209897,...
-    ## 3    POLYGON ((715706.4 6209942,...
-    ## 4    POLYGON ((715438.6 6209932,...
-    ## 2031 POLYGON ((585699.9 6240201,...
-    ## 2032 POLYGON ((585864.4 6240098,...
+    ## CRS arguments:
+    ##  +init=epsg:25832 +proj=utm +zone=32 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0
+    ## +units=m +no_defs
 
-Filtering dates between 2018 and 2021:
+### Filtering dates between 2012 and 2021:
 
 ``` r
 nitrate <- nitrate %>%
- select(Seneste_måling, Seneste_mgl, geometry, `Indtag topdybde`) %>%
- filter(Seneste_måling >= as.Date("2018-01-01") & Seneste_måling <= as.Date("2021-03-10"))
+ select(measurement_date, nitrate_concentration, geometry, measurement_depth) %>%
+ filter(measurement_date >= as.Date("2012-01-01") & measurement_date <= as.Date("2021-03-10"))
 ```
 
-Remove duplicate entries (for the purpose of kriging)
+### Remove duplicate entries:
 
 ``` r
-nitrate<-nitrate[!duplicated(nitrate$geometry), ]
+nitrate <- nitrate[!duplicated(nitrate$geometry), ]
 ```
 
-Plotting the points
+### Plotting the nitrate-data:
 
 ``` r
-plot(st_geometry(nitrate), pch = 16, cex = 0.4)
+plot(st_geometry(nitrate), pch = 16, cex = 0.4, main = "Nitrate measurements:")
 ```
 
-![](groundwater_pollution_dk_files/figure-gfm/unnamed-chunk-12-1.png)<!-- -->
+![](groundwater_pollution_dk_files/figure-gfm/unnamed-chunk-16-1.png)<!-- -->
 
-Plotting points on top of organic fields (to assess CRS allignment)
-
-``` r
-plot(st_geometry(nitrate), pch = 16, cex = 0.4, col = "red")
-plot(st_geometry(okologimark), add = TRUE)
-```
-
-![](groundwater_pollution_dk_files/figure-gfm/unnamed-chunk-13-1.png)<!-- -->
-
-Plotting points on top of all fields (to assess CRS allignment)
+### Plotting nitrate measurement-points on top of organic fields (to assess CRS allignment):
 
 ``` r
-plot(st_geometry(markblok))
-plot(st_geometry(nitrate), add = TRUE, pch = 16, cex = 0.4, col = "red")
-```
-
-![](groundwater_pollution_dk_files/figure-gfm/unnamed-chunk-14-1.png)<!-- -->
-
-\#Exploratory statistics:
-
-Depth:
-
-``` r
-summary(nitrate$`Indtag topdybde`)
-```
-
-    ##    Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
-    ##   -2.00    8.50   17.40   22.69   31.00  179.00
-
-``` r
-sd(nitrate$`Indtag topdybde`)
-```
-
-    ## [1] 19.42962
-
-Nitrate:
-
-``` r
-summary(nitrate$Seneste_mgl)
-```
-
-    ##    Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
-    ##    2.00    6.60   18.00   25.69   36.00  190.40
-
-``` r
-hist(nitrate$Seneste_mgl)
+plot(st_geometry(nitrate), pch = 16, cex = 0.4, col = "red", main = "Nitrate measurements (red) and organic fields (black):")
+plot(organic_fields, add = TRUE)
 ```
 
 ![](groundwater_pollution_dk_files/figure-gfm/unnamed-chunk-17-1.png)<!-- -->
 
-Plotting points with nitrate per. mg/l metric:
+### Plotting points on top of all conventional fields (to assess CRS allignment):
 
 ``` r
-ggplot(nitrate) +
-  geom_sf(aes(col = Seneste_mgl))
+plot(st_geometry(nitrate), pch = 16, cex = 0.4, col = "red", main = "Nitrate measurements (red) and conventional fields (black):")
+plot(conventional_fields, add = TRUE)
 ```
 
 ![](groundwater_pollution_dk_files/figure-gfm/unnamed-chunk-18-1.png)<!-- -->
 
-# Kriging:
+### Plotting points with nitrate per. mg/l metric:
 
-Creating X- and Y-value columns
+``` r
+ggplot(nitrate, aes(colour = nitrate_concentration)) +
+  geom_sf() + coord_sf(datum = st_crs(25832)) + theme_solarized() + labs(title = "Nitrate measurements:", color = "Nitrate (mg/L)") + scale_colour_gradientn(colors = c("darkgreen", "yellow", "red")) + xlab("Metres") + ylab("Metres")
+```
+
+![](groundwater_pollution_dk_files/figure-gfm/unnamed-chunk-19-1.png)<!-- -->
+
+# Exploratory statistics:
+
+## The following sections is designed to create a plot with depth distributions for nitrate measurements carried out on conventional- and organic fields, respectively (see written report for more info).
+
+### Creating a variable with conventional polygons in list-format:
+
+``` r
+conventional_polygon_list <- lapply(conventional_fields@polygons, function(x) SpatialPolygons(list(x)))
+```
+
+### Creating separate columns for nitrate X- and Y coordinates:
 
 ``` r
 nitrate$X <- st_coordinates(nitrate)[,1]
 nitrate$Y <- st_coordinates(nitrate)[,2]
 ```
 
-Make variogram by fitting X- and Y coordinates to nitrate mg/l with a
-linear regression
+### Finding nitrate measurements that fall within “conventional\_fields” polygons:
 
 ``` r
-vgm <- variogram(nitrate$Seneste_mgl ~ X + Y, nitrate)
+# Defining empty matrix for appending point-coordinates:
+point <- matrix(ncol = 2)
+
+# Create matrix with X- and Y coordinates for all nitrate measurements:
+for (i in c(1:length(nitrate$geometry))){ # For the number of elements in in nitrate$geometry...
+  p <- matrix(c(nitrate$X[i], nitrate$Y[i]), ncol = 2, byrow = TRUE) # ... iterate through X- and Y
+  point <- rbind(p, point) # ... Append coordinates to "point"-matrix
+}
+
+# Remove NA in point matrix (generated when initializing the matrix):
+point <- point %>% na.omit()
+
+# Convert the point-matrix to "SpatialPoints"-object:
+points <- SpatialPoints(point)
+
+# Create variable called "conventional_overlap" with a function that goes through all points and polygons in the "conventional_polygon_list". If a point falls within a polygon it returns "1", if not it returns "NA":
+conventional_overlap <- lapply(conventional_polygon_list, function(x) over(points, x))
+
+# Create function that converts the "conventional_overlap"-variable to a regular list, rather than a nested list (for indexing purposes):
+list_transform = function(x, sep = ".") {
+    names(x) = paste0(seq_along(x))
+    while(any(sapply(x, class) == "list")) {
+        ind = sapply(x, class) == "list"
+        temp = unlist(x[ind], recursive = FALSE)
+        names(temp) = paste0(rep(names(x)[ind], lengths(x[ind])),
+                             sep,
+                             sequence(lengths(x[ind])))
+        x = c(x[!ind], temp)
+    }
+    return(x)
+}
+
+# Apply the defined function to the "conventional_overlap"-variable:
+conventional_overlap <- list_transform(conventional_overlap)
+
+# Create a variable "called "indexes", containing all nitrate-measurement-points falling within the conventional-field polygons. Note: the format is: "polygon:point":
+indexes <- names(which(unlist(conventional_overlap) == 1))
+
+# Print indexes:
+indexes
+```
+
+    ##  [1] "2024.1973"  "2040.1578"  "2550.1123"  "3767.1826"  "4286.2781" 
+    ##  [6] "5846.261"   "6967.1371"  "8439.3405"  "8552.2075"  "8865.426"  
+    ## [11] "8937.2488"  "10289.1692" "10289.2477" "10396.977"  "12224.18"
+
+``` r
+# Remove the "polygon"-index (i.e. the index before the ".")
+indexes <- gsub("^[^.]+.", "", indexes)
+
+# Transform to numeric variable:
+indexes <- as.numeric(indexes)
+
+# Create a new column called "land_type" and fill it with "out of bounds":
+nitrate$land_type <- "out of bounds"
+
+# Change the value for "land_type" to "conventional" for all the nitrate measurements overlapping with conventional field polygons:
+for (i in indexes) {
+  nitrate$land_type[i] <- "conventional"
+}
+```
+
+### Finding nitrate measurements that fall within “organic\_fields” polygons:
+
+``` r
+organic_polygon_list <- lapply(organic_fields@polygons, function(x) SpatialPolygons(list(x)))
+```
+
+``` r
+# Create variable called "organic_overlap" with a function that goes through all points and polygons in the "organic_polygon_list". If a point falls within a polygon it returns "1", if not it returns "NA":
+organic_overlap <- lapply(organic_polygon_list, function(x) over(points, x))
+
+# Apply the defined function to the "organic_overlap"-variable:
+organic_overlap <- list_transform(organic_overlap)
+
+# Create a variable "called "indexes", containing all nitrate-measurement-points falling within the organic-field polygons. Note: the format is: "polygon:point":
+indexes <- names(which(unlist(organic_overlap) == 1))
+
+# Print indexes:
+indexes
+```
+
+    ##  [1] "1335.1432"  "1402.2281"  "1402.3062"  "2468.210"   "4996.541"  
+    ##  [6] "5458.462"   "5458.2328"  "5512.2536"  "5562.3128"  "7676.1111" 
+    ## [11] "7888.1198"  "8099.3347"  "11732.979"  "12085.3375" "12156.352"
+
+``` r
+# Remove the "polygon"-index (i.e. the index before the ".")
+indexes <- gsub("^[^.]+.", "", indexes)
+
+# Transform to numeric variable:
+indexes <- as.numeric(indexes)
+
+# Change the value for "land_type" to "organic" for all the nitrate measurements overlapping with organic field polygons:
+for (i in indexes) {
+  nitrate$land_type[i] <- "organic"
+}
+```
+
+### Plotting:
+
+``` r
+ggplot() +
+  geom_density(nitrate, mapping = aes(measurement_depth, colour = land_type)) + theme_solarized() + scale_colour_solarized() + labs(title = "Depth density plot:", color = "Nitrate (mg/L)") + xlab("Measurement depth") + ylab("Density")
+```
+
+![](groundwater_pollution_dk_files/figure-gfm/unnamed-chunk-25-1.png)<!-- -->
+
+# Kriging:
+
+### Make variogram by fitting X- and Y coordinates to nitrate mg/L:
+
+``` r
+vgm <- variogram(nitrate$nitrate_concentration ~ X + Y, nitrate)
 plot(vgm)
 ```
 
-![](groundwater_pollution_dk_files/figure-gfm/unnamed-chunk-20-1.png)<!-- -->
+![](groundwater_pollution_dk_files/figure-gfm/unnamed-chunk-26-1.png)<!-- -->
 
-ADELAS TEXT: “You might imagine that if soil at a particular point is
-nutrient-rich, then soil one metre away is likely to be fertile too. But
-can you say the same thing about soil one kilometre away, or ten
-kilometres, or one hundred kilometres?”
+As seen on the plot above, it appears that it is quite hard to find
+clear spatial correlations in the data. Nonetheless, it appears that
+measurements within 55000 meters of each other are more correlated than
+those further away. As such, we argue that this model can be used for
+kriging, since it only needs to interpolate data that is close to “real”
+data" (see written report for more info).
 
-JOHANS TEXT: “It appears that it is very hard to find spatial
-correlations in the data. Nonetheles, it appears that the first 30000
-(units) are more correlated than those further away. As such, we argue
-that this model can be used for kriging, since it only needs to
-interpolate data that is close to”real" data".
-
-Fit a model to the variogram:
+### Fit a model to the variogram:
 
 ``` r
-# Eyeball the variogram and estimate the initial parameters (ADELA TEXT)
-nugget <- 550
-psill <- -360
-range <- 45000
-# Fit the variogram (ADELA TEXT)
+# Use the above variogram to eyeball model parameters:
+nugget <- 550 # Initial value.
+psill <- 70 # Sealing - nugget.
+range <- 55000 # Point where spatial correlation stops. 
+
+# Fit the variogram to data:
 v_model <- fit.variogram(
   vgm, 
   model = vgm(
@@ -455,132 +424,222 @@ v_model <- fit.variogram(
     kappa = 0.5
   )
 )
+
 # Show the fitted variogram on top of the binned variogram (ADELA TEXT)
 plot(vgm, model = v_model)
 ```
 
-![](groundwater_pollution_dk_files/figure-gfm/unnamed-chunk-21-1.png)<!-- -->
+![](groundwater_pollution_dk_files/figure-gfm/unnamed-chunk-27-1.png)<!-- -->
+
+### Create kriging grid
 
 ``` r
-print(v_model)
-```
-
-    ##   model    psill    range kappa
-    ## 1   Nug 466.3852     0.00   0.0
-    ## 2   Ste 335.4143 55950.65   0.5
-
-# Create prediction grid (ALL COMMENTING IS ADELA)
-
-``` r
-# Create geo_bounds bounding box for kaz_geo 
-geo_bounds <- st_make_grid(nitrate$geometry, n=1)
-# Plot the bounding box polygon and points
-plot(nitrate$geometry); plot(geo_bounds, add= TRUE) 
-```
-
-![](groundwater_pollution_dk_files/figure-gfm/unnamed-chunk-22-1.png)<!-- -->
-
-``` r
-# Find the left bottom corner of the bounding box
+# Find the dimensions of the nitrate data:
 st_bbox(nitrate)
 ```
 
     ##    xmin    ymin    xmax    ymax 
-    ##  449314 6064054  885215 6397594
+    ##  449314 6064038  885215 6400597
 
 ``` r
-# Define a 0.5km square grid over the polygon extent. The first parameter is the bottom left corner.
+# Using the st_bbox output, manually design a grid slightly larger than the bounding box (for prettier plots). Specify that the kriging resolution should be 2000 meter pr. estimate:
+grid <- GridTopology(c(430734,6040448), c(2000, 2000), c(236, 190))
 
-grid <- GridTopology(c(446734,6054448), c(2000, 2000), c(222, 173))
-# Create points with the same coordinate system as the boundary box
-crs(nitrate)
-```
+# Make the grid a GridTopology-object with the same CRS as the nitrate data:
+gridpoints <- SpatialPoints(grid, proj4string = CRS(projection("+init=epsg:25832 +proj=utm +zone=32 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m
++no_defs")))
 
-    ## CRS arguments:
-    ##  +proj=utm +zone=32 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m
-    ## +no_defs
+# Convert gridpoint to SpatialPixels:
+spgrid <- SpatialPixels(gridpoints)
 
-``` r
-gridpoints <- SpatialPoints(grid, proj4string = CRS(projection("+proj=utm +zone=32 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs "))) # CHECK CRS
-
-#UNIQUE
-#the_crs <- crs(nitrate, asText = TRUE)
-#gridpoints <- st_set_crs(gridpoints, the_crs) # Project the "zion"-dataset into the srtm-crs and save it as "zion2".
-#### UNIQUE END
-
-plot(gridpoints); plot(geo_bounds, col = "red", add = TRUE)
-```
-
-![](groundwater_pollution_dk_files/figure-gfm/unnamed-chunk-22-2.png)<!-- -->
-
-``` r
-# Crop out the points outside the boundary
-cropped_gridpoints <- crop(gridpoints, as(geo_bounds, "Spatial"))
-plot(cropped_gridpoints);  plot(geo_bounds, col = "red", add = TRUE)
-```
-
-![](groundwater_pollution_dk_files/figure-gfm/unnamed-chunk-22-3.png)<!-- -->
-
-``` r
-# Convert to SpatialPixels
-spgrid <- SpatialPixels(cropped_gridpoints)
+# Define coordinate names to be X and Y:
 coordnames(spgrid) <- c("X", "Y")
+
+# Plot the grid:
 plot(spgrid)
 ```
 
-![](groundwater_pollution_dk_files/figure-gfm/unnamed-chunk-22-4.png)<!-- -->
+![](groundwater_pollution_dk_files/figure-gfm/unnamed-chunk-28-1.png)<!-- -->
 
-# Using fitted variogram model to interpolate new data to the grid
-
-ADELA: “Use the spatial pixel grid of the region, `spgrid`, and the
-variogram model of OM, `v_model` from previous exercises.”
+### Use fitted variogram model to interpolate new data to the grid defined above
 
 ``` r
-# Adjust the kaz_geo CRS to be consistent with spgrid
-crs(as(nitrate, "Spatial"), asText = TRUE) == crs(spgrid, asText = TRUE)
-```
-
-    ## [1] TRUE
-
-``` r
-# Despite the statement above krige() is erroring out due to CRS misalignment, so forcing it here:
+# Force the nitrate CRS to be consistent with spgrid (otherwise error messages ensue):
 nitrate_sp <- as(nitrate, "Spatial")
 crs(nitrate_sp) <- crs(spgrid)
-# Do kriging predictions over the grid
-nitrate_grid <- krige(Seneste_mgl ~ X + Y, nitrate_sp, newdata = spgrid, model = v_model)
+
+# Do kriging interpolations over the grid
+nitrate_grid <- krige(nitrate_concentration ~ X + Y, nitrate_sp, newdata = spgrid, model = v_model)
 ```
 
     ## [using universal kriging]
 
 ``` r
-# Plot the soil-nutrient predictions in a grid
+# Plot the nitrate measurements on top of the kriged "nitrate_grid":
 
-
-
-#UNIQUE:
-#Plotting raster:
+# Plotting raster:
 tm_shape(nitrate_grid[1])  +
   tm_raster(title = "Nitrate mg/l", 
             style = "cont",
             palette = "-RdYlGn") +
   tm_credits(text = "Johan Horsmans & Emil Jessen") +
-  tm_layout(main.title = "Nitrate pollution map")
-```
-
-![](groundwater_pollution_dk_files/figure-gfm/unnamed-chunk-23-1.png)<!-- -->
-
-``` r
-#Points overlayed on raster:
-tm_shape(nitrate_grid[1])  +
-  tm_raster(title = "Nitrate mg/l", 
-            style = "cont",
-            palette = "-RdYlGn") +
+  tm_layout(main.title = "Nitrate concentrations in Denmark:") +
+  
+# Nitrate measurements overlayed on raster:
 tm_shape(nitrate) +
   tm_dots()
 ```
 
-![](groundwater_pollution_dk_files/figure-gfm/unnamed-chunk-23-2.png)<!-- -->
+![](groundwater_pollution_dk_files/figure-gfm/unnamed-chunk-29-1.png)<!-- -->
+
+### Load DK map
 
 ``` r
-###
+DK <- st_read("data/denmark_administrative_outline_boundary.shp")
 ```
+
+    ## Reading layer `denmark_administrative_outline_boundary' from data source `/home/cds-au618771/cds-spatial/groundwater_polution_dk/data/denmark_administrative_outline_boundary.shp' using driver `ESRI Shapefile'
+    ## Simple feature collection with 1 feature and 18 fields
+    ## geometry type:  MULTIPOLYGON
+    ## dimension:      XY
+    ## bbox:           xmin: 8.074458 ymin: 54.55906 xmax: 15.19738 ymax: 57.75233
+    ## CRS:            4326
+
+### Inspect CRS
+
+``` r
+head(DK)
+```
+
+    ## Simple feature collection with 1 feature and 18 fields
+    ## geometry type:  MULTIPOLYGON
+    ## dimension:      XY
+    ## bbox:           xmin: 8.074458 ymin: 54.55906 xmax: 15.19738 ymax: 57.75233
+    ## CRS:            4326
+    ##   gid    id country    name  enname locname            offname       boundary
+    ## 1   1 50046     DNK Denmark Denmark Danmark Kongeriget Danmark administrative
+    ##   adminlevel wikidata  wikimedia           timestamp note    path   rpath
+    ## 1          2      Q35 da:Danmark 2020-01-02 22:59:02 <NA> 0,50046 50046,0
+    ##   iso3166_2  tid territory_                       geometry
+    ## 1      <NA> <NA>       <NA> MULTIPOLYGON (((11.90384 54...
+
+We see that the map has the wrong CRS (i.e. 4326).
+
+### Set correct CRS:
+
+``` r
+# Set the projection of the DK-map as EPSG 25832:
+DK <- st_set_crs(DK, value = 4326)
+
+# Transform the geometry of the map to the assigned CRS:
+DK <- st_transform(DK, crs=25832)
+```
+
+### Inspect CRS:
+
+``` r
+head(DK)
+```
+
+    ## Simple feature collection with 1 feature and 18 fields
+    ## geometry type:  MULTIPOLYGON
+    ## dimension:      XY
+    ## bbox:           xmin: 441626.5 ymin: 6049783 xmax: 893019.9 ymax: 6402282
+    ## CRS:            EPSG:25832
+    ##   gid    id country    name  enname locname            offname       boundary
+    ## 1   1 50046     DNK Denmark Denmark Danmark Kongeriget Danmark administrative
+    ##   adminlevel wikidata  wikimedia           timestamp note    path   rpath
+    ## 1          2      Q35 da:Danmark 2020-01-02 22:59:02 <NA> 0,50046 50046,0
+    ##   iso3166_2  tid territory_                       geometry
+    ## 1      <NA> <NA>       <NA> MULTIPOLYGON (((687732.7 60...
+
+### Crop raster to fit DK map (i.e. remove excess interpolations):
+
+``` r
+nitrate_raster <- raster(nitrate_grid)
+
+nitrate_grid_cropped <- crop(nitrate_raster, extent(DK))
+nitrate_grid_cropped <- raster::mask(nitrate_raster, DK)
+```
+
+### Make plot of interpolated data with DK map and nitrate measurements on top:
+
+``` r
+# Plotting raster:
+tm_shape(nitrate_grid_cropped)  +
+  tm_raster(title = "Nitrate mg/l", 
+            style = "cont",
+            palette = "-RdYlGn") +
+  
+# Adding DK-map:
+tm_shape(DK) + 
+  tm_polygons(alpha = 0.3) +
+  
+# Adding nitrate measurements overlayed on raster:
+tm_shape(nitrate) +
+  tm_dots(col = "grey27") +
+
+# Adding legend, credits and scale bar:
+  tm_credits(text = "Johan Horsmans & Emil Jessen") +
+  tm_layout(main.title = "Nitrate concentrations in Denmark:",
+            legend.position = c("right","top"),
+            legend.bg.color = "white", legend.bg.alpha = .2, 
+            legend.frame = "gray50",
+            bg.color = "lightblue") + tm_add_legend(type = "symbol",  labels = "Nitrate measurements", shape = 20, col = "grey27") + 
+  tm_scale_bar(breaks = c(20, 40, 60, 80, 100))
+```
+
+    ## Warning: First scale_bar breaks value should be 0.
+
+![](groundwater_pollution_dk_files/figure-gfm/unnamed-chunk-35-1.png)<!-- -->
+
+# Statistical modeling:
+
+### Extracting all kriged nitrate-values falling within organic fields:
+
+``` r
+# Extract kriged nitrate data (r) that fall "within organic_fields":
+organic_extraction <- suppressWarnings(raster::extract(x=nitrate_raster, y=organic_fields, fun=mean, df=TRUE, na.rm=TRUE))
+
+# Add column land_type and specify that it should be "organic":
+organic_extraction$land_type <- "organic"
+```
+
+### Extracting all kriged nitrate-values falling within conventional fields:
+
+``` r
+# Extract kriged nitrate data (r) that fall "within conventional_fields":
+conventional_extraction <- suppressWarnings(raster::extract(x=nitrate_raster, y=conventional_fields, fun=mean, df=TRUE, na.rm=TRUE))
+
+# Add column land_type and specify that it should be "conventional":
+conventional_extraction$land_type <- "conventional"
+```
+
+### Merge the extraced data:
+
+``` r
+# Merge the extracted data as "merged":
+merged <- rbind(organic_extraction, conventional_extraction)
+```
+
+Fit linear regression model with nitrate concentration predicted by land
+type:
+
+``` r
+# Fit linear regression model with nitrate concentration (var1.pred) ~ land_type:
+lm_model <- lm(var1.pred ~ land_type, data = merged)
+
+# Perform coefficient t-test:
+coeftest(lm_model, type = "HC1")
+```
+
+    ## 
+    ## t test of coefficients:
+    ## 
+    ##                   Estimate Std. Error t value  Pr(>|t|)    
+    ## (Intercept)      23.450711   0.058618 400.058 < 2.2e-16 ***
+    ## land_typeorganic  1.057946   0.082899  12.762 < 2.2e-16 ***
+    ## ---
+    ## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+
+For interpretation of output, see written report.
