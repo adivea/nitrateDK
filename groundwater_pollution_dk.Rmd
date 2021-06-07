@@ -295,14 +295,14 @@ vgm <- variogram(nitrate$nitrate_concentration ~ X + Y, nitrate)
 plot(vgm)
 ```
 
-As seen on the plot above, it appears that it is quite hard to find clear spatial correlations in the data. Nonetheless, it appears that measurements within 55000 meters of each other are more correlated than those further away. As such, we argue that this model can be used for kriging, since it only needs to interpolate data that is close to "real" data" (see written report for more info).
+As seen in the plot above, it appears that it is quite hard to find clear spatial correlations in the data. Nonetheless, it appears that measurements within 55000 meters of each other are more correlated than those further away. As such, we argue that this model can be used for kriging, since it only needs to interpolate data that is close to "real" data" (see written report for more info).
 
 ### Fit a model to the variogram:
 
 ```{r}
 # Use the above variogram to eyeball model parameters:
 nugget <- 550 # Initial value.
-psill <- 70 # Sealing - nugget.
+psill <- 70 # Ceiling - nugget.
 range <- 55000 # Point where spatial correlation stops. 
 
 # Fit the variogram to data:
