@@ -19,7 +19,8 @@ p_load(sf, raster, dplyr, tmap, ggplot2, tidyverse, lubridate, sp, gstat, ggthem
 nitrate <- as.data.frame(read_csv("data/nitrate.csv")) 
 ```
 
-    ## Parsed with column specification:
+    ## 
+    ## ── Column specification ────────────────────────────────────────────────────────
     ## cols(
     ##   WKT = col_character(),
     ##   `Vis data` = col_character(),
@@ -126,7 +127,7 @@ head(nitrate)
     ## geometry type:  POINT
     ## dimension:      XY
     ## bbox:           xmin: 475687 ymin: 6118543 xmax: 866691 ymax: 6208449
-    ## projected CRS:  ETRS89 / UTM zone 32N
+    ## CRS:            EPSG:25832
     ##   measurement_date nitrate_concentration measurement_depth
     ## 1       2016-10-31                     2               1.0
     ## 2       2019-09-25                     2              55.0
@@ -158,126 +159,116 @@ ggplot(nitrate, aes(colour = nitrate_concentration)) +
 all_fields <- st_read("data/Markblok.shp") %>% na.omit() %>% st_transform(25832)
 ```
 
-    ## Reading layer `Markblok' from data source `C:\Users\horsm\Desktop\Cultural Data Science\groundwater_pollution_dk\data\Markblok.shp' using driver `ESRI Shapefile'
+    ## Reading layer `Markblok' from data source `/home/cds-au618771/cds-visual/groundwater_pollution_dk/data/Markblok.shp' using driver `ESRI Shapefile'
     ## replacing null geometries with empty geometries
     ## Simple feature collection with 476658 features and 6 fields (with 1 geometry empty)
     ## geometry type:  POLYGON
     ## dimension:      XY
     ## bbox:           xmin: 442061.7 ymin: 6049864 xmax: 892661.5 ymax: 6401571
-    ## projected CRS:  ETRS89_UTM_zone_32N
+    ## proj4string:    +proj=utm +zone=32 +ellps=GRS80 +units=m +no_defs
 
 ``` r
 # Convert "fields" to SpatialPolygons-object:
 all_fields <- as_Spatial(all_fields$geometry)
-```
 
-    ## Warning in showSRID(uprojargs, format = "PROJ", multiline = "NO", prefer_proj
-    ## = prefer_proj): Discarded datum Unknown based on GRS80 ellipsoid in Proj4
-    ## definition
-
-    ## Warning in showSRID(SRS_string, format = "PROJ", multiline = "NO", prefer_proj
-    ## = prefer_proj): Discarded datum European Terrestrial Reference System 1989 in
-    ## Proj4 definition
-
-``` r
 # Load all registered ecological fields (from 2012 to 2020) and set CRS as EPSG 25832::
 organic_fields_2012 <- st_read("data/Oekologiske_arealer_2012.shp") %>% na.omit() %>% st_transform(25832)
 ```
 
-    ## Reading layer `Oekologiske_arealer_2012' from data source `C:\Users\horsm\Desktop\Cultural Data Science\groundwater_pollution_dk\data\Oekologiske_arealer_2012.shp' using driver `ESRI Shapefile'
+    ## Reading layer `Oekologiske_arealer_2012' from data source `/home/cds-au618771/cds-visual/groundwater_pollution_dk/data/Oekologiske_arealer_2012.shp' using driver `ESRI Shapefile'
     ## Simple feature collection with 49904 features and 5 fields
     ## geometry type:  POLYGON
     ## dimension:      XY
     ## bbox:           xmin: 445062.9 ymin: 6050575 xmax: 891630.3 ymax: 6391823
-    ## projected CRS:  ETRS89 / UTM zone 32N
+    ## proj4string:    +proj=utm +zone=32 +ellps=GRS80 +units=m +no_defs
 
 ``` r
 organic_fields_2013 <- st_read("data/Oekologiske_arealer_2013.shp") %>% na.omit() %>% st_transform(25832)
 ```
 
-    ## Reading layer `Oekologiske_arealer_2013' from data source `C:\Users\horsm\Desktop\Cultural Data Science\groundwater_pollution_dk\data\Oekologiske_arealer_2013.shp' using driver `ESRI Shapefile'
+    ## Reading layer `Oekologiske_arealer_2013' from data source `/home/cds-au618771/cds-visual/groundwater_pollution_dk/data/Oekologiske_arealer_2013.shp' using driver `ESRI Shapefile'
     ## Simple feature collection with 49326 features and 5 fields
     ## geometry type:  POLYGON
     ## dimension:      XY
     ## bbox:           xmin: 445063.1 ymin: 6050575 xmax: 892019.1 ymax: 6391818
-    ## projected CRS:  ETRS89 / UTM zone 32N
+    ## proj4string:    +proj=utm +zone=32 +ellps=GRS80 +units=m +no_defs
 
 ``` r
 organic_fields_2014 <- st_read("data/Oekologiske_arealer_2014.shp") %>% na.omit() %>% st_transform(25832)
 ```
 
-    ## Reading layer `Oekologiske_arealer_2014' from data source `C:\Users\horsm\Desktop\Cultural Data Science\groundwater_pollution_dk\data\Oekologiske_arealer_2014.shp' using driver `ESRI Shapefile'
+    ## Reading layer `Oekologiske_arealer_2014' from data source `/home/cds-au618771/cds-visual/groundwater_pollution_dk/data/Oekologiske_arealer_2014.shp' using driver `ESRI Shapefile'
     ## Simple feature collection with 47797 features and 5 fields
     ## geometry type:  POLYGON
     ## dimension:      XY
     ## bbox:           xmin: 445063.1 ymin: 6050576 xmax: 892019.6 ymax: 6391818
-    ## projected CRS:  ETRS89 / UTM zone 32N
+    ## proj4string:    +proj=utm +zone=32 +ellps=GRS80 +units=m +no_defs
 
 ``` r
 organic_fields_2015 <- st_read("data/Oekologiske_arealer_2015.shp") %>% na.omit() %>% st_transform(25832)
 ```
 
-    ## Reading layer `Oekologiske_arealer_2015' from data source `C:\Users\horsm\Desktop\Cultural Data Science\groundwater_pollution_dk\data\Oekologiske_arealer_2015.shp' using driver `ESRI Shapefile'
+    ## Reading layer `Oekologiske_arealer_2015' from data source `/home/cds-au618771/cds-visual/groundwater_pollution_dk/data/Oekologiske_arealer_2015.shp' using driver `ESRI Shapefile'
     ## Simple feature collection with 48803 features and 5 fields
     ## geometry type:  POLYGON
     ## dimension:      XY
     ## bbox:           xmin: 445063.1 ymin: 6050576 xmax: 892017.4 ymax: 6391818
-    ## projected CRS:  ETRS89 / UTM zone 32N
+    ## proj4string:    +proj=utm +zone=32 +ellps=GRS80 +units=m +no_defs
 
 ``` r
 organic_fields_2016 <- st_read("data/Oekologiske_arealer_2016.shp") %>% na.omit() %>% st_transform(25832)
 ```
 
-    ## Reading layer `Oekologiske_arealer_2016' from data source `C:\Users\horsm\Desktop\Cultural Data Science\groundwater_pollution_dk\data\Oekologiske_arealer_2016.shp' using driver `ESRI Shapefile'
+    ## Reading layer `Oekologiske_arealer_2016' from data source `/home/cds-au618771/cds-visual/groundwater_pollution_dk/data/Oekologiske_arealer_2016.shp' using driver `ESRI Shapefile'
     ## Simple feature collection with 59376 features and 5 fields
     ## geometry type:  POLYGON
     ## dimension:      XY
     ## bbox:           xmin: 444745.7 ymin: 6050576 xmax: 892017.4 ymax: 6392806
-    ## projected CRS:  ETRS89 / UTM zone 32N
+    ## proj4string:    +proj=utm +zone=32 +ellps=GRS80 +units=m +no_defs
 
 ``` r
 organic_fields_2017 <- st_read("data/Oekologiske_arealer_2017.shp") %>% na.omit() %>% st_transform(25832)
 ```
 
-    ## Reading layer `Oekologiske_arealer_2017' from data source `C:\Users\horsm\Desktop\Cultural Data Science\groundwater_pollution_dk\data\Oekologiske_arealer_2017.shp' using driver `ESRI Shapefile'
+    ## Reading layer `Oekologiske_arealer_2017' from data source `/home/cds-au618771/cds-visual/groundwater_pollution_dk/data/Oekologiske_arealer_2017.shp' using driver `ESRI Shapefile'
     ## Simple feature collection with 66344 features and 5 fields
     ## geometry type:  POLYGON
     ## dimension:      XY
     ## bbox:           xmin: 442061.7 ymin: 6050576 xmax: 892017.4 ymax: 6398325
-    ## projected CRS:  ETRS89 / UTM zone 32N
+    ## proj4string:    +proj=utm +zone=32 +ellps=GRS80 +units=m +no_defs
 
 ``` r
 organic_fields_2018 <- st_read("data/Oekologiske_arealer_2018.shp") %>% na.omit() %>% st_transform(25832)
 ```
 
-    ## Reading layer `Oekologiske_arealer_2018' from data source `C:\Users\horsm\Desktop\Cultural Data Science\groundwater_pollution_dk\data\Oekologiske_arealer_2018.shp' using driver `ESRI Shapefile'
+    ## Reading layer `Oekologiske_arealer_2018' from data source `/home/cds-au618771/cds-visual/groundwater_pollution_dk/data/Oekologiske_arealer_2018.shp' using driver `ESRI Shapefile'
     ## Simple feature collection with 74446 features and 6 fields
     ## geometry type:  POLYGON
     ## dimension:      XY
     ## bbox:           xmin: 442061.7 ymin: 6050576 xmax: 891630.3 ymax: 6398325
-    ## projected CRS:  ETRS89 / UTM zone 32N
+    ## proj4string:    +proj=utm +zone=32 +ellps=GRS80 +units=m +no_defs
 
 ``` r
 organic_fields_2019 <- st_read("data/Oekologiske_arealer_2019.shp") %>% na.omit() %>% st_transform(25832)
 ```
 
-    ## Reading layer `Oekologiske_arealer_2019' from data source `C:\Users\horsm\Desktop\Cultural Data Science\groundwater_pollution_dk\data\Oekologiske_arealer_2019.shp' using driver `ESRI Shapefile'
+    ## Reading layer `Oekologiske_arealer_2019' from data source `/home/cds-au618771/cds-visual/groundwater_pollution_dk/data/Oekologiske_arealer_2019.shp' using driver `ESRI Shapefile'
     ## Simple feature collection with 80218 features and 6 fields
     ## geometry type:  POLYGON
     ## dimension:      XY
     ## bbox:           xmin: 442061.7 ymin: 6050576 xmax: 891705.8 ymax: 6398325
-    ## projected CRS:  ETRS89 / UTM zone 32N
+    ## proj4string:    +proj=utm +zone=32 +ellps=GRS80 +units=m +no_defs
 
 ``` r
 organic_fields_2020 <- st_read("data/Oekologiske_arealer_2020.shp") %>% na.omit() %>% st_transform(25832)
 ```
 
-    ## Reading layer `Oekologiske_arealer_2020' from data source `C:\Users\horsm\Desktop\Cultural Data Science\groundwater_pollution_dk\data\Oekologiske_arealer_2020.shp' using driver `ESRI Shapefile'
+    ## Reading layer `Oekologiske_arealer_2020' from data source `/home/cds-au618771/cds-visual/groundwater_pollution_dk/data/Oekologiske_arealer_2020.shp' using driver `ESRI Shapefile'
     ## Simple feature collection with 80916 features and 6 fields
     ## geometry type:  POLYGON
     ## dimension:      XY
     ## bbox:           xmin: 442061.7 ymin: 6050576 xmax: 892069.6 ymax: 6401475
-    ## projected CRS:  ETRS89 / UTM zone 32N
+    ## proj4string:    +proj=utm +zone=32 +ellps=GRS80 +units=m +no_defs
 
 ``` r
 # Merge organic field-geometries as "organic_fields":
@@ -285,17 +276,7 @@ organic_fields <- c(organic_fields_2012$geometry, organic_fields_2013$geometry, 
 
 # Convert "organic_fields" to SpatialPolygons-object:
 organic_fields <- as_Spatial(organic_fields)
-```
 
-    ## Warning in showSRID(uprojargs, format = "PROJ", multiline = "NO", prefer_proj
-    ## = prefer_proj): Discarded datum Unknown based on GRS80 ellipsoid in Proj4
-    ## definition
-    
-    ## Warning in showSRID(uprojargs, format = "PROJ", multiline = "NO", prefer_proj
-    ## = prefer_proj): Discarded datum European Terrestrial Reference System 1989 in
-    ## Proj4 definition
-
-``` r
 # Make a new variable called "conventional_fields", where all polygons in "all_fields" that overlap with the polygons in "organic_fields" are removed:
 conventional_fields <- all_fields[lengths(st_intersects(st_as_sf(all_fields),st_as_sf(organic_fields)))==0,]
 
@@ -303,7 +284,7 @@ conventional_fields <- all_fields[lengths(st_intersects(st_as_sf(all_fields),st_
 length(all_fields) - length(conventional_fields)
 ```
 
-    ## [1] 9756
+    ## [1] 9749
 
 9756 organic fields have been filtered out. In summary, we have now
 loaded all nitrate-measurements between 2012 and 2021 and all current
@@ -319,7 +300,7 @@ head(conventional_fields)
     ## class       : SpatialPolygons 
     ## features    : 1 
     ## extent      : 480012.5, 480504.3, 6177890, 6178556  (xmin, xmax, ymin, ymax)
-    ## crs         : +proj=utm +zone=32 +ellps=GRS80 +units=m +no_defs
+    ## crs         : +proj=utm +zone=32 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs
 
 ``` r
 head(organic_fields)
@@ -433,11 +414,9 @@ indexes <- names(which(unlist(conventional_overlap) == 1))
 indexes
 ```
 
-    ##  [1] "379.2748"   "1720.561"   "1728.722"   "1728.2925"  "1728.3364" 
-    ##  [6] "2563.2530"  "5085.687"   "5736.1997"  "6483.180"   "6483.196"  
-    ## [11] "6483.777"   "6483.1097"  "6483.1153"  "6483.3188"  "8267.169"  
-    ## [16] "8667.2205"  "9462.32"    "9781.2597"  "10190.1254" "10352.964" 
-    ## [21] "10388.2367" "11046.1307" "11054.3392" "11408.1004" "12467.2955"
+    ##  [1] "663.141"    "828.1636"   "2799.3274"  "3100.2570"  "4353.2783" 
+    ##  [6] "5695.234"   "6788.1578"  "6911.398"   "6911.456"   "7170.2113" 
+    ## [11] "7441.1035"  "9024.1345"  "11282.275"  "12071.2225" "12071.3227"
 
 ``` r
 # Remove the "polygon"-index (i.e. the index before the ".")
@@ -507,17 +486,6 @@ ggplot() +
 
 ``` r
 vgm <- variogram(nitrate$nitrate_concentration ~ X + Y, nitrate)
-```
-
-    ## Warning in showSRID(uprojargs, format = "PROJ", multiline = "NO", prefer_proj
-    ## = prefer_proj): Discarded datum Unknown based on GRS80 ellipsoid in Proj4
-    ## definition
-
-    ## Warning in showSRID(SRS_string, format = "PROJ", multiline = "NO", prefer_proj
-    ## = prefer_proj): Discarded datum European Terrestrial Reference System 1989 in
-    ## Proj4 definition
-
-``` r
 plot(vgm)
 ```
 
@@ -573,12 +541,7 @@ grid <- GridTopology(c(430734,6040448), c(2000, 2000), c(236, 190))
 # Make the grid a GridTopology-object with the same CRS as the nitrate data:
 gridpoints <- SpatialPoints(grid, proj4string = CRS(projection("+init=epsg:25832 +proj=utm +zone=32 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m
 +no_defs")))
-```
 
-    ## Warning in showSRID(uprojargs, format = "PROJ", multiline = "NO", prefer_proj = prefer_proj): Discarded datum Unknown based on GRS80 ellipsoid in Proj4 definition,
-    ##  but +towgs84= values preserved
-
-``` r
 # Convert gridpoint to SpatialPixels:
 spgrid <- SpatialPixels(gridpoints)
 
@@ -596,17 +559,6 @@ plot(spgrid)
 ``` r
 # Force the nitrate CRS to be consistent with spgrid (otherwise error messages ensue):
 nitrate_sp <- as(nitrate, "Spatial")
-```
-
-    ## Warning in showSRID(uprojargs, format = "PROJ", multiline = "NO", prefer_proj
-    ## = prefer_proj): Discarded datum Unknown based on GRS80 ellipsoid in Proj4
-    ## definition
-
-    ## Warning in showSRID(SRS_string, format = "PROJ", multiline = "NO", prefer_proj
-    ## = prefer_proj): Discarded datum European Terrestrial Reference System 1989 in
-    ## Proj4 definition
-
-``` r
 crs(nitrate_sp) <- crs(spgrid)
 
 # Do kriging interpolations over the grid
@@ -631,12 +583,6 @@ tm_shape(nitrate) +
   tm_dots()
 ```
 
-    ## Warning in sp::proj4string(obj): CRS object has comment, which is lost in output
-
-    ## Warning in sp::proj4string(.x): CRS object has comment, which is lost in output
-    
-    ## Warning in sp::proj4string(.x): CRS object has comment, which is lost in output
-
 ![](groundwater_pollution_dk_files/figure-gfm/unnamed-chunk-28-1.png)<!-- -->
 
 ### Load DK map
@@ -645,12 +591,12 @@ tm_shape(nitrate) +
 DK <- st_read("data/denmark_administrative_outline_boundary.shp")
 ```
 
-    ## Reading layer `denmark_administrative_outline_boundary' from data source `C:\Users\horsm\Desktop\Cultural Data Science\groundwater_pollution_dk\data\denmark_administrative_outline_boundary.shp' using driver `ESRI Shapefile'
+    ## Reading layer `denmark_administrative_outline_boundary' from data source `/home/cds-au618771/cds-visual/groundwater_pollution_dk/data/denmark_administrative_outline_boundary.shp' using driver `ESRI Shapefile'
     ## Simple feature collection with 1 feature and 18 fields
     ## geometry type:  MULTIPOLYGON
     ## dimension:      XY
     ## bbox:           xmin: 8.074458 ymin: 54.55906 xmax: 15.19738 ymax: 57.75233
-    ## geographic CRS: WGS 84
+    ## CRS:            4326
 
 ### Inspect CRS
 
@@ -662,7 +608,7 @@ head(DK)
     ## geometry type:  MULTIPOLYGON
     ## dimension:      XY
     ## bbox:           xmin: 8.074458 ymin: 54.55906 xmax: 15.19738 ymax: 57.75233
-    ## geographic CRS: WGS 84
+    ## CRS:            4326
     ##   gid    id country    name  enname locname            offname       boundary
     ## 1   1 50046     DNK Denmark Denmark Danmark Kongeriget Danmark administrative
     ##   adminlevel wikidata  wikimedia           timestamp note    path   rpath
@@ -692,7 +638,7 @@ head(DK)
     ## geometry type:  MULTIPOLYGON
     ## dimension:      XY
     ## bbox:           xmin: 441626.5 ymin: 6049783 xmax: 893019.9 ymax: 6402282
-    ## projected CRS:  ETRS89 / UTM zone 32N
+    ## CRS:            EPSG:25832
     ##   gid    id country    name  enname locname            offname       boundary
     ## 1   1 50046     DNK Denmark Denmark Danmark Kongeriget Danmark administrative
     ##   adminlevel wikidata  wikimedia           timestamp note    path   rpath
@@ -708,14 +654,6 @@ nitrate_raster <- raster(nitrate_grid)
 nitrate_grid_cropped <- crop(nitrate_raster, extent(DK))
 nitrate_grid_cropped <- raster::mask(nitrate_raster, DK)
 ```
-
-    ## Warning in showSRID(uprojargs, format = "PROJ", multiline = "NO", prefer_proj
-    ## = prefer_proj): Discarded datum Unknown based on GRS80 ellipsoid in Proj4
-    ## definition
-
-    ## Warning in showSRID(SRS_string, format = "PROJ", multiline = "NO", prefer_proj
-    ## = prefer_proj): Discarded datum European Terrestrial Reference System 1989 in
-    ## Proj4 definition
 
 ### Make plot of interpolated data with DK map and nitrate measurements on top:
 
@@ -792,8 +730,8 @@ coeftest(lm_model, type = "HC1")
     ## t test of coefficients:
     ## 
     ##                   Estimate Std. Error t value  Pr(>|t|)    
-    ## (Intercept)      23.410662   0.058374  401.05 < 2.2e-16 ***
-    ## land_typeorganic  1.097994   0.082553   13.30 < 2.2e-16 ***
+    ## (Intercept)      23.484705   0.058407 402.085 < 2.2e-16 ***
+    ## land_typeorganic  1.023951   0.082600  12.396 < 2.2e-16 ***
     ## ---
     ## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 

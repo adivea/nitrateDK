@@ -92,7 +92,6 @@ ggplot(nitrate, aes(colour = nitrate_concentration)) +
   geom_sf() + coord_sf(datum = st_crs(25832)) + theme_solarized() + labs(title = "Nitrate measurements:", color = "Nitrate (mg/L)") + scale_colour_gradientn(colors = c("darkgreen", "yellow", "red")) + xlab("Metres") + ylab("Metres")
 ```
 
-
 ### Loading land-use data:
 ```{r}
 # Loading "Markblok.shp" which contains all registered fields in Denmark and set CRS as EPSG 25832:
