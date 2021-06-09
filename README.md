@@ -85,13 +85,13 @@ bash data_download.sh
 ## Repository structure
 This repository has the following structure:
 
-| Column | Description|
+| File | Description|
 |--------|:-----------|
 ```spatial_analysis.md```| Markdown of the spatial analysis
 ```spatial_analysis.rmd```| Script used for the spatial analysis
 ```data/data_download.sh``` | Script which downloads the data required for the analysis
 ```data/nitrat.csv```| Groundwater samples containing information on nitrate and geographical coordinates of samples in the period 1900-2021.
-```data/REGION.*```| Shapefiles containing a map of Denmark, by regions.
+```data/denmark_administrative_outline_boundary.*```| Shapefiles containing a map of Denmark.
 ```data/Markblok.*```| Shapefiles containing polygons of fields in Denmark in the period 1990-2021.
 ```data/Oekologiske_arealer.*```| Shapefiles containing polygons of organic field in 2018-2021
 ```README_images/*.png```| Images used for the README
@@ -100,6 +100,15 @@ This repository has the following structure:
 
 <!-- USAGE EXAMPLES -->
 ## Data
+
+The data used in the analysis is all publicly available and has been acquired through the online portals of the respective ministries and software companies that are in possession of the data.
+Note that the portals’ links and data availability may be deprecated in the future. However, in such instances access to the data can still nonetheless still be achieved through our script “data_download.sh” located in our Github repository. The four datasets that were used in our analysis are:
+
+1. Point data with samples of nitrate levels in Denmark. This dataset contains 14,350 measurements of nitrate concentrations at different geographic locations in Denmark from 1900 to March 2021. The dataset was provided by courtesy of De Nationale Geologiske Undersøgelser for Danmark og Grønland (GEUS). The included variables used in our analysis are: coordinates, measurement date, nitrate concentration and measurement depth. The data was retrieved from their [webpage](https://data.geus.dk/geusmap/ows/help/?mapname=nitrat_2mg_and_above_aggr&epsg=25832).
+2. A shapefile containing polygons of all current agricultural fields in Denmark as of April 2021.  This dataset is provided by the Ministry of Food, Agriculture and Fisheries of Denmark (Danish Agricultural Agency). The dataset was retrieved from the following [webpage](https://kortdata.fvm.dk/download/).
+3. Shapefiles containing polygons of all organic agricultural fields in Denmark, registered each year between the period of 2012 to 2020. This dataset is provided by the Danish Agricultural Agency. The dataset was supposed to be publicly available through the Danish Agricultural Agency’s website, but since this was not the case, we were sent the following [link](https://filkassen.statens-it.dk/userportal/#/shared/public/0Kr0R6Oq9A3CqvRM/%C3%98kologiske%20arealer) to the dataset in a mail correspondence with the agency.
+4. A shapefile containing a polygon in the shape of Denmark, courtesy of the software company IGIS MAP. The shapefile was retrieved from the their [webpage](https://www.igismap.com/).
+
 
 <!-- USAGE EXAMPLES -->
 ## Usage
