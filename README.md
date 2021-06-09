@@ -73,7 +73,7 @@ steps in the README is designed for Git Bash on Windows 10.
 
 ### Prerequisites
 
-The spatial analysis requires data layers that exceed the maximum filesize on GitHub. To reproduce the analysis the script ```data/data_download.sh``` has been provided. It will automatically download the files contained within [a Google Drive folder](https://drive.google.com/drive/folders/1ZbnRr2CnVcMm0M2-v3AN7aOMlW5HMXfT?usp=sharing). 
+The spatial analysis requires data layers that exceed the maximum filesize on GitHub. To reproduce the analysis the script ```data/data_download.sh``` has been provided. It will automatically download the files needed for replicating our analysis.
 
 For rerunning the analysis we therefore recommend cloning the repository, as well as using the provided script for downloading the data.
 This can be done using the following lines in an unix-based bash:
