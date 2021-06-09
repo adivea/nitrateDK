@@ -68,6 +68,9 @@ The quality of Denmark’s groundwater supplies is under threat due to the use o
 
 To get a local copy up and running follow these simple example steps.
 
+**NOTE:** there may be slight variations depending on the terminal and operating system you use. The
+steps in the README is designed for Git Bash on Windows 10.
+
 ### Prerequisites
 
 The spatial analysis requires data layers that exceed the maximum filesize on GitHub. To reproduce the analysis the script ```data/data_download.sh``` has been provided. It will automatically download the files contained within [a Google Drive folder](https://drive.google.com/drive/folders/1ZbnRr2CnVcMm0M2-v3AN7aOMlW5HMXfT?usp=sharing). 
@@ -80,6 +83,8 @@ git clone https://github.com/emiltj/groundwater_pollution_dk.git
 cd groundwater_pollution_dk
 bash data_download.sh
 ```
+
+You should now be ready to run the code.
 
 <!-- REPOSITORY STRUCTURE -->
 ## Repository structure
