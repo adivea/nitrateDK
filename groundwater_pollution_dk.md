@@ -552,8 +552,6 @@ tm_shape(nitrate) +
   tm_scale_bar(breaks = c(20, 40, 60, 80, 100))
 ```
 
-    ## Warning: First scale_bar breaks value should be 0.
-
 ![](groundwater_pollution_dk_files/figure-gfm/unnamed-chunk-34-1.png)<!-- -->
 
 # Statistical modeling:
