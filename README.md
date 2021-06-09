@@ -115,7 +115,7 @@ Note that the portals’ links and data availability may be deprecated in the fu
 
 ### Running the script
 
-After cloning the repository and downloading the required data, open up the ```groundwater_pollution_dk.rmd``` R markdown in Rstudio (see written report for version specifics). Running the code, top-down should result in a direct access to the analysis the lays the foundation for our project report.
+After cloning the repository and downloading the required data, open up the <a href="groundwater_pollution_dk.md">```groundwater_pollution_dk.rmd```</a> R markdown in Rstudio (see written report for version specifics). Running the code, top-down should result in a direct access to the analysis the lays the foundation for our project report.
 
 ### Inspecting the script
 
