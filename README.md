@@ -87,8 +87,8 @@ This repository has the following structure:
 
 | File | Description|
 |--------|:-----------|
-```spatial_analysis.md```| Markdown of the spatial analysis
-```spatial_analysis.rmd```| Script used for the spatial analysis
+```groundwater_pollution_dk.md```| Markdown of the spatial analysis
+```groundwater_pollution_dk.rmd```| Script used for the spatial analysis
 ```data/data_download.sh``` | Script which downloads the data required for the analysis
 ```data/nitrat.csv```| Groundwater samples containing information on nitrate and geographical coordinates of samples in the period 1900-2021.
 ```data/denmark_administrative_outline_boundary.*```| Shapefiles containing a map of Denmark.
