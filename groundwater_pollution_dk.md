@@ -468,13 +468,6 @@ tm_shape(nitrate) +
 DK <- st_read("data/denmark_administrative_outline_boundary.shp")
 ```
 
-    ## Reading layer `denmark_administrative_outline_boundary' from data source `/home/cds-au618771/cds-visual/groundwater_pollution_dk/data/denmark_administrative_outline_boundary.shp' using driver `ESRI Shapefile'
-    ## Simple feature collection with 1 feature and 18 fields
-    ## geometry type:  MULTIPOLYGON
-    ## dimension:      XY
-    ## bbox:           xmin: 8.074458 ymin: 54.55906 xmax: 15.19738 ymax: 57.75233
-    ## CRS:            4326
-
 ### Inspect CRS
 
 ``` r
