@@ -111,8 +111,7 @@ After cloning the repository and downloading the required data, open up the ```g
 ### Inspecting the script
 
 As an alternative to rerunning our script, you may merely want to inspect the code and the output.
-For simply examining the analysis and its results, we recommend inspecting the markdown version of the analysis.
-* <a href="groundwater_pollution_dk.md">```spatial_analysis.md```</a>
+For simply examining the analysis and its results, we recommend inspecting the markdown version of the analysis <a href="groundwater_pollution_dk.md">```groundwater_pollution_dk.md```</a>.
 
 <!-- CONTRIBUTING -->
 ## Contributing
