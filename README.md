@@ -89,14 +89,18 @@ This repository has the following structure:
 |--------|:-----------|
 ```groundwater_pollution_dk.md```| Markdown of the spatial analysis
 ```groundwater_pollution_dk.rmd```| Script used for the spatial analysis
-```data/data_download.sh``` | Script which downloads the data required for the analysis
+```data_download.sh``` | Script which downloads the data required for the analysis
+```README_images/*.png```| Images used for the README
+```README.md``` | Readme with instructions
+```LICENSE``` | [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0) which specifies the permitted usage of the repository
+
+Upon running the ```data_download.sh``` bash script, the directory will have an additional "data" directory, with the following content:
+| File | Description|
+|--------|:-----------|
 ```data/nitrat.csv```| Groundwater samples containing information on nitrate and geographical coordinates of samples in the period 1900-2021.
 ```data/denmark_administrative_outline_boundary.*```| Shapefiles containing a map of Denmark.
 ```data/Markblok.*```| Shapefiles containing polygons of fields in Denmark in the period 1990-2021.
 ```data/Oekologiske_arealer.*```| Shapefiles containing polygons of organic field in 2018-2021
-```README_images/*.png```| Images used for the README
-```README.md``` | Readme with instructions
-```LICENSE``` | [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0) which specifies the permitted usage of the repository
 
 <!-- USAGE EXAMPLES -->
 ## Data
