@@ -13,7 +13,6 @@
     <br />
     <a href="https://github.com/emiltj/groundwater_pollution_dk/report.pdf"><strong>Read the report»</strong></a>
     <br />
-    <br />
     <a href="https://github.com/emiltj/groundwater_pollution_dk/blob/master/groundwater_pollution_dk.md">View markdown</a>
     ·
     <a href="https://github.com/emiltj/groundwater_pollution_dk/issues">Report bug</a>
@@ -35,6 +34,9 @@
       <ul>
         <li><a href="#prerequisites">Prerequisites</a></li>
       </ul>
+      <ul>
+        <li><a href="#running-the-script">Running the script</a></li>
+      </ul>      
     </li>
     <li><a href="#repository-structure">Repository structure</a></li>
     <li><a href="#data">Data</a></li>
@@ -54,20 +56,9 @@
 <p align="center"><em>Example visualization from the project, showing nitrate measurement placements and kriged nitrate concentrations in the groundwater </em>
 </p>
 
-This project analyzes the relationship between land use and nitrate pollution in the groundwater in Denmark. It investigates the ... bla. bla...
+**See [here](https://github.com/emiltj/groundwater_pollution_dk/blob/main/spatial_analytics_exam_2021.pdf) for the written report. The written report contains the motivation as well as an in-depth introduction to the topic, specifics to running the analysis, results and finally also a discussion of the project.**
 
-Why this analysis?
-* Y
-* Y
-* Y
-
-Findings of the analysis:
-* Y
-* Y
-* Y
-
-Of course,
-
+_The quality of Denmark’s groundwater supplies is under threat due to the use of nitrate in agriculture. The popular public opinion is that conventional agricultural farming contributes more to this negative development compared to organic agriculture. We wish to assess the scientific validity of this belief. Using kriging, linear modeling and coefficient t-tests, we carry out a spatial analysis comparing nitrate concentration levels in Denmark for conventional- and organic agricultural farming. Here, we find significantly higher nitrate concentrations for organic fields, with organic- and conventional fields having mean nitrate concentrations of 24.51 mg/L and 23.48 mg/L, respectively.  Followingly, we discuss potential confounding factors in our analysis and their impact on our results. Furthermore, follow-up questions and prospects for relevant future research are discussed._
 
 <!-- GETTING STARTED -->
 ## Getting started
@@ -86,6 +77,8 @@ git clone https://github.com/emiltj/spatial_exam.git
 cd groundwater_pollution_dk
 bash data_download.sh
 ```
+
+### Running the script
 
 <!-- REPOSITORY STRUCTURE -->
 ## Repository structure
@@ -126,18 +119,15 @@ Contributions are what make the open source community such an amazing place to b
 4. Push to the Branch (`git push origin analysis/extended_analysis`)
 5. Open a Pull Request
 
-
 <!-- LICENSE -->
 ## License
 Distributed under the [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0). See ```LICENSE``` for more information.
-
 
 <!-- CONTACT -->
 ## Contact
 
 Feel free to write the authors, Emil Jessen or Johan Horsmans for any questions regarding the scripts.
-You may do so on Slack ([Emil](https://app.slack.com/client/T01908QBS9X/D01A1LFRDE0), [Johan](google.dk))
-
+You may do so on Slack ([Emil](https://app.slack.com/client/T01908QBS9X/D01A1LFRDE0), [Johan](https://app.slack.com/client/T01908QBS9X/D01BDPKT3BL))
 
 <!-- ACKNOWLEDGEMENTS -->
 ## Acknowledgements
@@ -145,5 +135,5 @@ You may do so on Slack ([Emil](https://app.slack.com/client/T01908QBS9X/D01A1LFR
 * [GEUS-DATA](https://www.geus.dk/) - Data portal for geological investigations in Denmark/Greenland
 * [Danish Agricultural Agency](https://lbst.dk/landbrug/kort-og-markblokke/) - The Danish Agricultural Agency portal, containing geographical information on land use 
 * [README template](https://github.com/othneildrew/Best-README-Template) - README template by othneildrew
-* Rstudio
-* Leaflet
+* [Rstudio](https://www.rstudio.com/) - Software used for conducting the analysis
+* [Overleaf](https://www.overleaf.com/) - Software used to format and write the report
