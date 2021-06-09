@@ -76,7 +76,7 @@ For rerunning the analysis we therefore recommend cloning the repository, as wel
 This can be done using the following lines in an unix-based bash:
 
 ```bash
-git clone https://github.com/emiltj/spatial_exam.git
+git clone https://github.com/emiltj/groundwater_pollution_dk.git
 cd groundwater_pollution_dk
 bash data_download.sh
 ```
