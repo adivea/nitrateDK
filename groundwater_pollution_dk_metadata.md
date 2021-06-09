@@ -33,6 +33,6 @@ please see the repository
     Denmark from 1900 to March 2021. The dataset was provided by
     courtesy of De Nationale Geologiske Undersøgelser for Danmark og
     Grønland (GEUS). The included variables used in our analysis are:
-    * __‘WKT’__ (coordinates)*, *__‘Seneste’__ (measurement date)*, *__‘Seneste
+    *__‘WKT’__ (coordinates)*, *__‘Seneste’__ (measurement date)*, *__‘Seneste
     mg/l’__ (nitrate concentration (milligram/liter))* and *__‘Indtag
     topdybde’__ (measurement depth (metres))*.
