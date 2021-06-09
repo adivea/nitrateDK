@@ -86,7 +86,7 @@ bash data_download.sh
 This repository has the following structure:
 
 | File | Description|
-|--------|:-----------|
+|--------|:-------|
 ```groundwater_pollution_dk.md```| Markdown of the spatial analysis
 ```groundwater_pollution_dk.rmd```| Script used for the spatial analysis
 ```data_download.sh``` | Script which downloads the data required for the analysis
@@ -96,7 +96,7 @@ This repository has the following structure:
 
 Upon running the ```data_download.sh``` bash script, the directory will have an additional "data" directory, with the following content:
 | File | Description|
-|--------|:-----------|
+|--------|:-------|
 ```data/nitrat.csv```| Groundwater samples containing information on nitrate and geographical coordinates of samples in the period 1900-2021.
 ```data/denmark_administrative_outline_boundary.*```| Shapefiles containing a map of Denmark.
 ```data/Markblok.*```| Shapefiles containing polygons of fields in Denmark in the period 1990-2021.
