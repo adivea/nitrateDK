@@ -34,13 +34,16 @@
       <ul>
         <li><a href="#prerequisites">Prerequisites</a></li>
       </ul>
-      <ul>
-        <li><a href="#running-the-script">Running the script</a></li>
-      </ul>      
     </li>
     <li><a href="#repository-structure">Repository structure</a></li>
     <li><a href="#data">Data</a></li>
     <li><a href="#usage">Usage</a></li>
+        <ul>
+          <li><a href="#running-the-script">Running the script</a></li>
+        </ul>
+        <ul>
+          <li><a href="#inspecting-the-script">Inspecting the script</a></li>
+        </ul>      
     <li><a href="#contributing">Contributing</a></li>
     <li><a href="#license">License</a></li>
     <li><a href="#contact">Contact</a></li>
@@ -58,7 +61,7 @@
 
 **See [here](https://github.com/emiltj/groundwater_pollution_dk/blob/main/spatial_analytics_exam_2021.pdf) for the written report. The written report contains the motivation as well as an in-depth introduction to the topic, specifics to running the analysis, results and finally also a discussion of the project.**
 
-_The quality of Denmark’s groundwater supplies is under threat due to the use of nitrate in agriculture. The popular public opinion is that conventional agricultural farming contributes more to this negative development compared to organic agriculture. We wish to assess the scientific validity of this belief. Using kriging, linear modeling and coefficient t-tests, we carry out a spatial analysis comparing nitrate concentration levels in Denmark for conventional- and organic agricultural farming. Here, we find significantly higher nitrate concentrations for organic fields, with organic- and conventional fields having mean nitrate concentrations of 24.51 mg/L and 23.48 mg/L, respectively.  Followingly, we discuss potential confounding factors in our analysis and their impact on our results. Furthermore, follow-up questions and prospects for relevant future research are discussed._
+The quality of Denmark’s groundwater supplies is under threat due to the use of nitrate in agriculture. The popular public opinion is that conventional agricultural farming contributes more to this negative development compared to organic agriculture. We wish to assess the scientific validity of this belief. Using kriging, linear modeling and coefficient t-tests, we carry out a spatial analysis comparing nitrate concentration levels in Denmark for conventional- and organic agricultural farming. Here, we find significantly higher nitrate concentrations for organic fields, with organic- and conventional fields having mean nitrate concentrations of 24.51 mg/L and 23.48 mg/L, respectively. Followingly, we discuss potential confounding factors in our analysis and their impact on our results. Furthermore, follow-up questions and prospects for relevant future research are discussed.
 
 <!-- GETTING STARTED -->
 ## Getting started
@@ -78,8 +81,6 @@ cd groundwater_pollution_dk
 bash data_download.sh
 ```
 
-### Running the script
-
 <!-- REPOSITORY STRUCTURE -->
 ## Repository structure
 This repository has the following structure:
@@ -97,16 +98,21 @@ This repository has the following structure:
 ```README.md``` | Readme with instructions
 ```LICENSE``` | [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0) which specifies the permitted usage of the repository
 
-
 <!-- USAGE EXAMPLES -->
 ## Data
 
 <!-- USAGE EXAMPLES -->
 ## Usage
 
+### Running the script
+
+After cloning the repository and downloading the required data, open up the ```groundwater_pollution_dk.rmd``` R markdown in Rstudio (see written report for version specifics). Running the code, top-down should result in a direct access to the analysis the lays the foundation for our project report.
+
+### Inspecting the script
+
+As an alternative to rerunning our script, you may merely want to inspect the code and the output.
 For simply examining the analysis and its results, we recommend inspecting the markdown version of the analysis.
 * <a href="groundwater_pollution_dk.md">```spatial_analysis.md```</a>
-
 
 <!-- CONTRIBUTING -->
 ## Contributing
