@@ -139,7 +139,7 @@ Contributions are what make the open source community such an amazing place to b
 
 <!-- LICENSE -->
 ## License
-Distributed under the [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0). See ```LICENSE``` for more information.
+Distributed under the [MIT license](https://opensource.org/licenses/MIT). See ```LICENSE``` for more information.
 
 <!-- CONTACT -->
 ## Contact
