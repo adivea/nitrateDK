@@ -50,7 +50,9 @@
 <!-- ABOUT THE PROJECT -->
 ## About the project
 
-<img src="groundwater_pollution_dk_files/figure-gfm/unnamed-chunk-34-1.png" alt="Logo" width="672" height="480">
+<p align="center"><img src="groundwater_pollution_dk_files/figure-gfm/unnamed-chunk-34-1.png" alt="Logo" width="672" height="480"></p>
+<p align="center"><em>Example visualization from the project, showing nitrate measurement placements and kriged nitrate concentrations in the groundwater </em>
+</p>
 
 This project analyzes the relationship between land use and nitrate pollution in the groundwater in Denmark. It investigates the ... bla. bla...
 
