@@ -102,7 +102,7 @@ This repository has the following structure:
 ## Data
 
 The data used in the analysis is all publicly available and has been acquired through the online portals of the respective ministries and software companies that are in possession of the data.
-Note that the portals’ links and data availability may be deprecated in the future. However, in such instances access to the data can still nonetheless still be achieved through our script “data_download.sh” located in our Github repository. The four datasets that were used in our analysis are:
+Note that the portals’ links and data availability may be deprecated in the future. However, in such instances access to the data can still nonetheless still be achieved through our script ```data_download.sh```. The four datasets that were used in our analysis are:
 
 1. Point data with samples of nitrate levels in Denmark. This dataset contains 14,350 measurements of nitrate concentrations at different geographic locations in Denmark from 1900 to March 2021. The dataset was provided by courtesy of De Nationale Geologiske Undersøgelser for Danmark og Grønland (GEUS). The included variables used in our analysis are: coordinates, measurement date, nitrate concentration and measurement depth. The data was retrieved from their [webpage](https://data.geus.dk/geusmap/ows/help/?mapname=nitrat_2mg_and_above_aggr&epsg=25832).
 2. A shapefile containing polygons of all current agricultural fields in Denmark as of April 2021.  This dataset is provided by the Ministry of Food, Agriculture and Fisheries of Denmark (Danish Agricultural Agency). The dataset was retrieved from the following [webpage](https://kortdata.fvm.dk/download/).
