@@ -50,7 +50,7 @@
 <!-- ABOUT THE PROJECT -->
 ## About the project
 
-<p align="center"><img src="groundwater_pollution_dk_files/figure-gfm/unnamed-chunk-34-1.png" alt="Logo" width="336" height="240"></p>
+<p align="center"><img src="groundwater_pollution_dk_files/figure-gfm/unnamed-chunk-34-1.png" alt="Logo" width="504" height="360"></p>
 <p align="center"><em>Example visualization from the project, showing nitrate measurement placements and kriged nitrate concentrations in the groundwater </em>
 </p>
 
