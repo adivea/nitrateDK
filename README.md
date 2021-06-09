@@ -14,7 +14,7 @@
     <a href="https://github.com/emiltj/groundwater_pollution_dk/report.pdf"><strong>Read the report»</strong></a>
     <br />
     <br />
-    <a href="https://github.com/emiltj/groundwater_pollution_dk/groundwater_pollution_dk.md">View markdown</a>
+    <a href="https://github.com/emiltj/groundwater_pollution_dk/blob/master/groundwater_pollution_dk.md">View markdown</a>
     ·
     <a href="https://github.com/emiltj/groundwater_pollution_dk/issues">Report bug</a>
     ·
