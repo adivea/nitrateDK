@@ -11,7 +11,7 @@
   <p align="center">
     Spatial analysis exam project 2021
     <br />
-    <a href="https://github.com/emiltj/groundwater_pollution_dk/blob/master/groundwater_pollution_in_denmark.pdf"><strong>Read the report»</strong></a>
+    <a href="https://github.com/emiltj/groundwater_pollution_dk/blob/master/Groundwater_Pollution_in_Denmark.pdf"><strong>Read the report»</strong></a>
     <br />
     <a href="https://github.com/emiltj/groundwater_pollution_dk/blob/master/groundwater_pollution_dk.md">View markdown</a>
     ·
