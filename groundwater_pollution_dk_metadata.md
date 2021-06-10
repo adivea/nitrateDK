@@ -15,7 +15,7 @@ please see the repository
     polygon in the shape of Denmark, courtesy of the software company
     IGIS MAP.
 
-  - `Markblok` A shapefile containing polygons of all current
+  - `Markblok` A shapefile containing 476,657 polygons with all current
     agricultural fields in Denmark as of April 2021. This dataset is
     provided by the Ministry of Food, Agriculture and Fisheries of
     Denmark (Danish Agricultural Agency)
@@ -24,7 +24,15 @@ please see the repository
     of all organic agricultural fields in Denmark, registered each year
     between the period of 2012 to 2020. This dataset is provided by the
     Danish Agricultural Agency.
-      - testing
+      - `Oekologiske_arealer_2012` Shapefile containg 2,181 spatial polygons with all the new organic fields registered in 2012.
+      - `Oekologiske_arealer_2013` Shapefile containg 2,614 spatial polygons with all the new organic fields registered in 2013.
+      - `Oekologiske_arealer_2014` Shapefile containg 2,655 spatial polygons with all the new organic fields registered in 2014.
+      - `Oekologiske_arealer_2015` Shapefile containg 1,349 spatial polygons with all the new organic fields registered in 2015.
+      - `Oekologiske_arealer_2016` Shapefile containg 1,915 spatial polygons with all the new organic fields registered in 2016.
+      - `Oekologiske_arealer_2017` Shapefile containg 287 spatial polygons with all the new organic fields registered in 2017.
+      - `Oekologiske_arealer_2018` Shapefile containg 369 spatial polygons with all the new organic fields registered in 2018.
+      - `Oekologiske_arealer_2019` Shapefile containg 886 spatial polygons with all the new organic fields registered in 2019.
+      - `Oekologiske_arealer_2020` Shapefile containg 304 spatial polygons with all the new organic fields registered in 2020.
 
 **Agricultural Measurement Data**
 
