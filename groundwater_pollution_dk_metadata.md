@@ -13,17 +13,17 @@ please see the repository
 
   - `denmark_administrative_outline_boundary` A shapefile containing a
     polygon in the shape of Denmark, courtesy of the software company
-    IGIS MAP. Default CRS: EPSG:4326
+    IGIS MAP. Default CRS: __EPSG:4326__
 
   - `Markblok` A shapefile containing 476,657 polygons with all current
     agricultural fields in Denmark as of April 2021. This dataset is
     provided by the Ministry of Food, Agriculture and Fisheries of
-    Denmark (Danish Agricultural Agency). Default CRS: EPSG:25832
+    Denmark (Danish Agricultural Agency). Default CRS: __EPSG:25832__
 
   - `Oekologiske_arealer_{2012 - 2020}` Shapefiles containing polygons
     of all organic agricultural fields in Denmark, registered each year
     between the period of 2012 to 2020. This dataset is provided by the
-    Danish Agricultural Agency. EPSG:25832
+    Danish Agricultural Agency. Default CRS: __EPSG:25832__
       - `Oekologiske_arealer_2012` Shapefile containg 2,181 spatial polygons with all the new organic fields registered in 2012.
       - `Oekologiske_arealer_2013` Shapefile containg 2,614 spatial polygons with all the new organic fields registered in 2013.
       - `Oekologiske_arealer_2014` Shapefile containg 2,655 spatial polygons with all the new organic fields registered in 2014.
@@ -44,4 +44,4 @@ please see the repository
     Grønland (GEUS). The included variables used in our analysis are:
     *__‘WKT’__ (coordinates)*, *__‘Seneste’__ (measurement date)*, *__‘Seneste
     mg/l’__ (nitrate concentration (milligram/liter))* and *__‘Indtag
-    topdybde’__ (measurement depth (metres))*. Default CRS: EPSG:25832
+    topdybde’__ (measurement depth (metres))*. Default CRS: __EPSG:25832__
