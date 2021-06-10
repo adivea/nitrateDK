@@ -55,13 +55,14 @@
 <!-- ABOUT THE PROJECT -->
 ## About the project
 
+The quality of Denmark’s groundwater supplies is under threat due to the use of nitrate in agriculture. In the last few years there has been a cultural shift in public opinion, where conventional agriculture is progressively being seen as more damaging to the environment, compared to its organic counterpart. We wish to assess the scientific validity of this belief. Using kriging, linear modeling and coefficient t-tests, we carry out a spatial analysis comparing nitrate concentration levels in Denmark for conventional- and organic agricultural farming. Here, we find significantly higher nitrate concentrations for organic fields, with organic- and conventional fields having mean nitrate concentrations of 24.51 mg/L and 23.48 mg/L, respectively. A discussion of results, confounding factors, and prospects for future research can be found in the written report on the project.
+
 <p align="center"><img src="groundwater_pollution_dk_files/figure-gfm/unnamed-chunk-34-1.png" alt="Logo" width="504" height="360"></p>
 <p align="center"><em>Example visualization from the project, showing nitrate measurement placements and kriged nitrate concentrations in the groundwater </em>
 </p>
 
 **See [here](https://github.com/emiltj/groundwater_pollution_dk/blob/main/spatial_analytics_exam_2021.pdf) for the written report. The written report contains the motivation as well as an in-depth introduction to the topic, specifics to running the analysis, results and finally also a discussion of the project.**
 
-The quality of Denmark’s groundwater supplies is under threat due to the use of nitrate in agriculture. In the last few years there has been a cultural shift in public opinion, where conventional agriculture is progressively being seen as more damaging to the environment, compared to its organic counterpart. We wish to assess the scientific validity of this belief. Using kriging, linear modeling and coefficient t-tests, we carry out a spatial analysis comparing nitrate concentration levels in Denmark for conventional- and organic agricultural farming. Here, we find significantly higher nitrate concentrations for organic fields, with organic- and conventional fields having mean nitrate concentrations of 24.51 mg/L and 23.48 mg/L, respectively. A discussion of results, confounding factors, and prospects for future research can be found in the written report on the project.
 
 <!-- GETTING STARTED -->
 ## Getting started
