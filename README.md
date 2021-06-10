@@ -68,8 +68,7 @@ The quality of Denmark’s groundwater supplies is under threat due to the use o
 
 To get a local copy up and running follow these simple example steps.
 
-**NOTE:** There may be slight variations depending on the terminal and operating system you use. The
-steps in the README is designed for Git Bash on Windows 10.
+**NOTE:** There may be slight variations depending on the terminal and operating system you use.  Thefollowing example is designed forGit BashonWindows 10. You also need to have _pip_ installed:
 
 ### Prerequisites
 
