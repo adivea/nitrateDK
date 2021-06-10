@@ -7,7 +7,7 @@ The following markdown contains metadata descriptions of the data used
 for the `groundwater_pollution_dk.Rmd`-script (i.e. our Spatial
 Analytics Exam 2021). For a detailed guide on how to download the data,
 please see the repository
-[README](https://github.com/emiltj/groundwater_pollution_dk/blob/master/README.md#prerequisites). For elaborate descriptions of how the data has been retrieved, please refer to [<a href="Groundwater_Pollution_in_Denmark.pdf">```Groundwater_Pollution_in_Denmark.pdf```</a>, Section 2,2 "data acquisition"
+[README](https://github.com/emiltj/groundwater_pollution_dk/blob/master/README.md#prerequisites). For elaborate descriptions of how the data has been retrieved, please refer to <a href="Groundwater_Pollution_in_Denmark.pdf">```Groundwater_Pollution_in_Denmark.pdf```</a>, Section 2,2 "data acquisition"
 
 **Spatial Polygon Data**
 
