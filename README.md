@@ -69,7 +69,7 @@ The quality of Denmark’s groundwater supplies is under threat due to the use o
 
 To get a local copy up and running follow these simple example steps.
 
-**NOTE:** there may be slight variations depending on the terminal and operating system you use. The
+**NOTE:** There may be slight variations depending on the terminal and operating system you use. The
 steps in the README is designed for Git Bash on Windows 10.
 
 ### Prerequisites
@@ -100,7 +100,7 @@ This repository has the following structure:
 ```README.md``` | Readme with instructions
 ```LICENSE``` | [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0) which specifies the permitted usage of the repository
 
-Upon running the ```data_download.sh``` bash script, the directory will have an additional "data" directory, with the following content:
+Upon running the ```data_download.sh``` bash script, the directory will have an additional *data* directory, with the following content:
 | File | Description|
 |--------|:-------|
 ```data/nitrat.csv```| Groundwater samples containing information on nitrate and geographical coordinates of samples in the period 1900-2021.
