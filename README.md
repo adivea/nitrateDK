@@ -61,8 +61,7 @@ The quality of Denmark’s groundwater supplies is under threat due to the use o
 <p align="center"><em>Example visualization from the project, showing nitrate measurement placements and kriged nitrate concentrations in the groundwater </em>
 </p>
 
-**See [here](https://github.com/emiltj/groundwater_pollution_dk/blob/main/spatial_analytics_exam_2021.pdf) for the written report.** The written report contains the motivation as well as an in-depth introduction to the topic, specifics to running the analysis, results and finally also a discussion of the project.
-
+**See <a href="Groundwater_Pollution_in_Denmark.pdf">```Groundwater_Pollution_in_Denmark.pdf```</a> for the written report.** The written report contains the motivation as well as an in-depth introduction to the topic, specifics to running the analysis, results and finally also a discussion of the project.
 
 <!-- GETTING STARTED -->
 ## Getting started
@@ -95,10 +94,14 @@ This repository has the following structure:
 |--------|:-------|
 ```groundwater_pollution_dk.md```| Markdown of the spatial analysis
 ```groundwater_pollution_dk.Rmd```| Script used for the spatial analysis
-```data_download.sh``` | Script which downloads the data required for the analysis
+```groundwater_pollution_dk_files``` | Directory containing output images from the script
+```Groundwater_Pollution_in_Denmark.pdf``` | Written report containing our exam hand-in for Spatial Analytics 2021
 ```README_images/*.png```| Images used for the README
 ```README.md``` | Readme with instructions
-```LICENSE``` | [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0) which specifies the permitted usage of the repository
+```metadata.md``` | Metadata document specifying data structure and contents
+```data_download.sh``` | Script which downloads the data required for the analysis
+```.gitignore``` | .gitignore file for avoiding the large data files
+```LICENSE``` | [MIT License](https://opensource.org/licenses/MIT) which specifies the permitted usage of the repository
 
 Upon running the ```data_download.sh``` bash script, the directory will have an additional *data* directory, with the following content:
 | File | Description|
@@ -119,6 +122,7 @@ Note that the portals’ links and data availability may be deprecated in the fu
 3. Shapefiles containing polygons of all organic agricultural fields in Denmark, registered each year between the period of 2012 to 2020. This dataset is provided by the Danish Agricultural Agency. The dataset was supposed to be publicly available through the Danish Agricultural Agency’s website, but since this was not the case, we were sent the following [link](https://filkassen.statens-it.dk/userportal/#/shared/public/0Kr0R6Oq9A3CqvRM/%C3%98kologiske%20arealer) to the dataset in a mail correspondence with the agency.
 4. A shapefile containing a polygon in the shape of Denmark, courtesy of the software company IGIS MAP. The shapefile was retrieved from the their [webpage](https://www.igismap.com/).
 
+For metadata information, see <a href="metadata.md">```metadata.md```</a>
 
 <!-- USAGE EXAMPLES -->
 ## Usage
@@ -145,7 +149,7 @@ Contributions are what make the open source community such an amazing place to b
 
 <!-- LICENSE -->
 ## License
-Distributed under the [MIT license](https://opensource.org/licenses/MIT). See ```LICENSE``` for more information.
+Distributed under the [MIT License](https://opensource.org/licenses/MIT). See ```LICENSE``` for more information.
 
 <!-- CONTACT -->
 ## Contact
