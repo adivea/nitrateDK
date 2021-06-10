@@ -491,10 +491,10 @@ We see that the map has the wrong CRS (i.e. 4326).
 ### Set correct CRS:
 
 ``` r
-# Set the projection of the DK-map as EPSG 25832:
+# Set the projection of the DK-map as EPSG:4326:
 DK <- st_set_crs(DK, value = 4326)
 
-# Transform the geometry of the map to the assigned CRS:
+# Transform the geometry of the map to the assigned CRS (EPSG:25832):
 DK <- st_transform(DK, crs=25832)
 ```
 
