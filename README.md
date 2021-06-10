@@ -94,7 +94,7 @@ This repository has the following structure:
 | File | Description|
 |--------|:-------|
 ```groundwater_pollution_dk.md```| Markdown of the spatial analysis
-```groundwater_pollution_dk.rmd```| Script used for the spatial analysis
+```groundwater_pollution_dk.Rmd```| Script used for the spatial analysis
 ```data_download.sh``` | Script which downloads the data required for the analysis
 ```README_images/*.png```| Images used for the README
 ```README.md``` | Readme with instructions
@@ -125,7 +125,7 @@ Note that the portals’ links and data availability may be deprecated in the fu
 
 ### Running the script
 
-After cloning the repository and downloading the required data, open up the <a href="groundwater_pollution_dk.Rmd">```groundwater_pollution_dk.rmd```</a> R-markdown in Rstudio (see written report for version specifics). Running the code should give you direct access to the analysis which lays the foundation for our written report.
+After cloning the repository and downloading the required data, open up the <a href="groundwater_pollution_dk.Rmd">```groundwater_pollution_dk.Rmd```</a> R-markdown in Rstudio (see written report for version specifics). Running the code should give you direct access to the analysis which lays the foundation for our written report.
 
 ### Inspecting the script
 
