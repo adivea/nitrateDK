@@ -159,6 +159,9 @@ You may do so through our emails ([Emil](mailto:201807525@post.au.dk), [Johan](m
 
 <!-- ACKNOWLEDGEMENTS -->
 ## Acknowledgements
+We want to give a special thanks to our instructor for the Spatial Analytics course, Adéla Sobotkova fornot only providing guidance for our project but also generally providing an informative and useful course.We also want to express our gratitude towards Lars West Andersen and the Danish Agricultural Agency forproviding explanations of the data on agricultural fields.
+
+Furthermore, we would like to extend our gratitude towards the following:
 * [RStudio](https://www.rstudio.com/) - Software used for conducting the analysis
 * [GEUS-DATA](https://www.geus.dk/) - Data portal for geological investigations in Denmark/Greenland
 * [Danish Agricultural Agency](https://lbst.dk/landbrug/kort-og-markblokke/) - The Danish Agricultural Agency portal, containing geographical information on land use 
