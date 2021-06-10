@@ -92,10 +92,10 @@ This repository has the following structure:
 
 | File | Description|
 |--------|:-------|
+```Groundwater_Pollution_in_Denmark.pdf``` | Written report containing our exam hand-in for Spatial Analytics 2021
 ```groundwater_pollution_dk.md```| Markdown of the spatial analysis
 ```groundwater_pollution_dk.Rmd```| Script used for the spatial analysis
 ```groundwater_pollution_dk_files``` | Directory containing output images from the script
-```Groundwater_Pollution_in_Denmark.pdf``` | Written report containing our exam hand-in for Spatial Analytics 2021
 ```README_images/*.png```| Images used for the README
 ```README.md``` | Readme with instructions
 ```metadata.md``` | Metadata document specifying data structure and contents
@@ -122,7 +122,7 @@ Note that the portals’ links and data availability may be deprecated in the fu
 3. Shapefiles containing polygons of all organic agricultural fields in Denmark, registered each year between the period of 2012 to 2020. This dataset is provided by the Danish Agricultural Agency. The dataset was supposed to be publicly available through the Danish Agricultural Agency’s website, but since this was not the case, we were sent the following [link](https://filkassen.statens-it.dk/userportal/#/shared/public/0Kr0R6Oq9A3CqvRM/%C3%98kologiske%20arealer) to the dataset in a mail correspondence with the agency.
 4. A shapefile containing a polygon in the shape of Denmark, courtesy of the software company IGIS MAP. The shapefile was retrieved from the their [webpage](https://www.igismap.com/).
 
-For metadata information, see <a href="metadata.md">```metadata.md```</a>
+For metadata information, see <a href="metadata.md">```metadata.md```</a>.
 
 <!-- USAGE EXAMPLES -->
 ## Usage
@@ -155,7 +155,7 @@ Distributed under the [MIT License](https://opensource.org/licenses/MIT). See ``
 ## Contact
 
 Feel free to write the authors, Emil Jessen or Johan Horsmans for any questions regarding the scripts.
-You may do so on Slack ([Emil](https://app.slack.com/client/T01908QBS9X/D01A1LFRDE0), [Johan](https://app.slack.com/client/T01908QBS9X/D01BDPKT3BL))
+You may do so through our emails ([Emil](mailto:201807525@post.au.dk), [Johan](mailto:201810219@post.au.dk))
 
 <!-- ACKNOWLEDGEMENTS -->
 ## Acknowledgements
